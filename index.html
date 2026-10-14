@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Dashboard de Manutenção · REAM</title>
+<style>
+
+  :root {
+    --color-fg: #1f2328;
+    --color-fg-muted: #636c76;
+    --color-bg: #ffffff;
+    --color-panel: #ffffff;
+    --color-border-line: #e1e4e8;
+    --color-ok: #1f9d6c;
+    --color-warn: #d6842a;
+    --color-bad: #c22e33;
+    --font-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
+    --cds-gap-xs: 4px;
+    --cds-gap-sm: 8px;
+    --cds-gap-md: 14px;
+    --cds-gap-lg: 22px;
+    --cds-pad-xs: 4px;
+    --cds-pad-sm: 8px;
+    --cds-pad-md: 14px;
+    --cds-pad-lg: 22px;
+    --cds-radius: 10px;
+    --cds-font-size-caption: 12.5px;
+    --cds-font-size-body: 14.5px;
+    --cds-font-size-heading: 16px;
+    --cds-font-size-title: 22px;
+    --cds-font-weight-medium: 600;
+    --cds-chart-grid: #eef0f2;
+    --cds-chart-axis: #d4d8dc;
+    --cds-surface-popover: #ffffff;
+    --cds-border: #e1e4e8;
+    --cds-shadow-popover: 0 4px 16px rgba(20, 20, 20, 0.14);
+    --cds-dur-slow: 220ms;
+    --cds-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #f4f5f6;
+    font-family: var(--font-sans);
+  }
+  body {
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  .ream-page-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+
+  .ream-dash {
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .ream-dash .rd-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cds-gap-md);
+    margin-bottom: var(--cds-gap-lg);
+    background: linear-gradient(135deg, #e3101f, #b70d19);
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-lg);
+  }
+  .ream-dash .rd-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--cds-gap-md);
+    min-width: 0;
+  }
+  .ream-dash .rd-logo-badge {
+    background: #fff;
+    border-radius: 10px;
+    padding: 0.4em 0.65em;
+    display: flex;
+    align-items: center;
+    flex: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+  .ream-dash .rd-logo-badge img {
+    display: block;
+    height: 2.4rem;
+    width: auto;
+  }
+  .ream-dash .rd-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--cds-font-size-title);
+    margin: 0;
+    color: #fff;
+  }
+  .ream-dash .rd-sub {
+    margin: 0.35rem 0 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--cds-font-size-body);
+    max-width: 62ch;
+  }
+  .ream-dash .rd-sub .dash-skeleton { background: rgba(255, 255, 255, 0.35); }
+  .ream-dash .rd-badge-scope {
+    font-size: var(--cds-font-size-caption);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-xs) var(--cds-pad-sm);
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .ream-dash .rd-tabs {
+    display: flex;
+    gap: var(--cds-gap-xs);
+    border-bottom: 1px solid var(--color-border-line);
+    margin-bottom: var(--cds-gap-lg);
+    overflow-x: auto;
+  }
+  .ream-dash .rd-tab {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-fg-muted);
+    font: inherit;
+    font-size: var(--cds-font-size-body);
+    font-weight: var(--cds-font-weight-medium);
+    padding: var(--cds-pad-sm) var(--cds-pad-md);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ream-dash .rd-tab:hover { color: var(--color-fg); }
+  .ream-dash .rd-tab[aria-selected="true"] {
+    color: var(--color-fg);
+    border-bottom-color: var(--rd-accent);
+  }
+  .ream-dash .rd-tab:focus-visible { outline: 2px solid var(--rd-accent); outline-offset: 2px; }
+
+  .ream-dash .rd-panel[hidden] { display: none; }
+
+  .ream-dash .rd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: var(--cds-gap-md);
+  }
+  .ream-dash .rd-grid-charts { margin-top: var(--cds-gap-md); }
+  .ream-dash .rd-chart-col { min-width: 0; }
+  .ream-dash .rd-chart-col-divider {
+    border-left: 1px solid var(--color-border-line);
+    padding-left: var(--cds-gap-lg);
+  }
+  @media (max-width: 40rem) {
+    .ream-dash .rd-chart-col-divider {
+      border-left: none;
+      padding-left: 0;
+      border-top: 1px solid var(--color-border-line);
+      padding-top: var(--cds-gap-md);
+    }
+  }
+  .ream-dash .rd-chart-subtitle {
+    font-size: var(--cds-font-size-heading);
+    font-weight: var(--cds-font-weight-medium);
+    margin: 0 0 var(--cds-gap-xs);
+  }
+  .ream-dash .rd-chart-note {
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin: 0 0 var(--cds-gap-sm);
+  }
+  .ream-dash .rd-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--cds-gap-md);
+    margin-bottom: var(--cds-gap-lg);
+  }
+  .ream-dash .rd-card {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border-line);
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-lg);
+    min-width: 0;
+  }
+  .ream-dash .rd-kpi {
+    color: #fff;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 6.5rem;
+  }
+  .ream-dash .rd-kpi .rd-kpi-label {
+    font-size: var(--cds-font-size-caption);
+    color: rgba(255, 255, 255, 0.82);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .ream-dash .rd-kpi .rd-kpi-value {
+    font-family: var(--font-serif);
+    font-size: var(--cds-font-size-title);
+    margin-top: var(--cds-gap-xs);
+    line-height: 1.1;
+    color: #fff;
+  }
+  .ream-dash .rd-kpi .rd-kpi-value.dash-skeleton { background: rgba(255, 255, 255, 0.35); }
+  .ream-dash .rd-kpi .rd-kpi-note {
+    font-size: var(--cds-font-size-caption);
+    color: rgba(255, 255, 255, 0.82);
+    margin-top: var(--cds-gap-xs);
+  }
+  /* Cores por significado — usadas nos cards de indicador E nos gráficos, para o mesmo status ter sempre a mesma cor. */
+  .ream-dash .rd-kpi.kpi-abertos { background: linear-gradient(135deg, #e5484d, #c22e33); }
+  .ream-dash .rd-kpi.kpi-aguardando { background: linear-gradient(135deg, #f0a93d, #d6842a); }
+  .ream-dash .rd-kpi.kpi-programados { background: linear-gradient(135deg, #8b5cf6, #6d3fd6); }
+  .ream-dash .rd-kpi.kpi-concluidos { background: linear-gradient(135deg, #22a870, #178a59); }
+  .ream-dash .rd-kpi.kpi-registros { background: linear-gradient(135deg, #0d9aa1, #0a7c82); }
+  .ream-dash .rd-kpi.kpi-cadastro { background: linear-gradient(135deg, #2f7ed8, #2056a8); }
+  .ream-dash .rd-footnote {
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin: var(--cds-gap-sm) 0 0;
+  }
+
+  .ream-dash .rd-card-title {
+    font-size: var(--cds-font-size-heading);
+    font-weight: var(--cds-font-weight-medium);
+    margin: 0 0 0.15rem;
+  }
+  .ream-dash .rd-card-note {
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin: 0 0 var(--cds-gap-md);
+  }
+  .ream-dash .rd-section {
+    margin-bottom: var(--cds-gap-lg);
+  }
+  .ream-dash .rd-section-head {
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 var(--cds-gap-sm);
+  }
+
+  .ream-dash .rd-chartbox { min-height: 260px; position: relative; }
+  .ream-dash .rd-chartbox svg { display: block; width: 100%; overflow: visible; }
+  .ream-dash .rd-legend {
+    display: flex;
+    gap: var(--cds-gap-md);
+    flex-wrap: wrap;
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin-bottom: var(--cds-gap-sm);
+  }
+  .ream-dash .rd-legend-item { display: flex; align-items: center; gap: 0.4em; }
+  .ream-dash .rd-legend-swatch { width: 0.65em; height: 0.65em; border-radius: 2px; display: inline-block; }
+
+  .ream-dash .rd-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--cds-surface-popover);
+    border: 1px solid var(--cds-border);
+    border-radius: var(--cds-radius);
+    box-shadow: var(--cds-shadow-popover);
+    padding: var(--cds-pad-xs) var(--cds-pad-sm);
+    font-size: var(--cds-font-size-caption);
+    opacity: 0;
+    transition: opacity 0.1s;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .ream-dash .rd-tooltip .rd-tt-title { color: var(--color-fg-muted); margin-bottom: 0.2em; }
+  .ream-dash .rd-tooltip .rd-tt-row { display: flex; align-items: center; gap: 0.4em; }
+
+  .ream-dash .rd-se-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--cds-gap-sm);
+  }
+  .ream-dash .rd-se-card {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border-line);
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-md);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: var(--cds-gap-xs);
+    min-width: 0;
+  }
+  .ream-dash .rd-se-card:hover { border-color: var(--rd-accent); }
+  .ream-dash .rd-se-card:focus-visible { outline: 2px solid var(--rd-accent); outline-offset: 2px; }
+  .ream-dash .rd-se-name { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-body); }
+  .ream-dash .rd-se-count { font-family: var(--font-serif); font-size: var(--cds-font-size-heading); }
+  .ream-dash .rd-se-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
+  .ream-dash .rd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: var(--cds-font-size-caption);
+    padding: 0.15em 0.6em;
+    border-radius: 999px;
+    width: fit-content;
+  }
+  .ream-dash .rd-pill::before { content: ""; width: 0.5em; height: 0.5em; border-radius: 50%; background: currentColor; }
+  .ream-dash .rd-pill.lvl-prioridade { color: var(--color-bad); background: color-mix(in srgb, var(--color-bad) 14%, transparent); }
+  .ream-dash .rd-pill.lvl-atencao { color: var(--color-warn); background: color-mix(in srgb, var(--color-warn) 16%, transparent); }
+  .ream-dash .rd-pill.lvl-controlada { color: var(--color-ok); background: color-mix(in srgb, var(--color-ok) 14%, transparent); }
+  .ream-dash .rd-pill.lvl-cadastro { color: var(--color-fg-muted); background: color-mix(in srgb, var(--color-fg-muted) 14%, transparent); }
+
+  .ream-dash .rd-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cds-gap-sm);
+    align-items: center;
+    margin-bottom: var(--cds-gap-md);
+  }
+  .ream-dash .rd-filters select,
+  .ream-dash .rd-filters input[type="search"] {
+    font: inherit;
+    font-size: var(--cds-font-size-body);
+    padding: var(--cds-pad-xs) var(--cds-pad-sm);
+    border-radius: var(--cds-radius);
+    border: 1px solid var(--color-border-line);
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+  .ream-dash .rd-filters input[type="search"] { min-width: 14rem; flex: 1; }
+  .ream-dash .rd-clear {
+    appearance: none;
+    background: none;
+    border: 1px solid var(--color-border-line);
+    border-radius: var(--cds-radius);
+    color: var(--color-fg-muted);
+    font: inherit;
+    font-size: var(--cds-font-size-caption);
+    padding: var(--cds-pad-xs) var(--cds-pad-sm);
+    cursor: pointer;
+  }
+  .ream-dash .rd-clear:hover { color: var(--color-fg); border-color: var(--rd-accent); }
+
+  .ream-dash .rd-table-wrap {
+    max-height: 32rem;
+    overflow: auto;
+    border: 1px solid var(--color-border-line);
+    border-radius: var(--cds-radius);
+  }
+  .ream-dash table.rd-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-body); }
+  .ream-dash table.rd-table th {
+    position: sticky;
+    top: 0;
+    background: var(--color-panel);
+    text-align: left;
+    font-weight: var(--cds-font-weight-medium);
+    padding: var(--cds-pad-sm) var(--cds-pad-md);
+    border-bottom: 1px solid var(--color-border-line);
+    white-space: nowrap;
+  }
+  .ream-dash table.rd-table th button {
+    appearance: none;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+  .ream-dash table.rd-table th[aria-sort="ascending"] button::after { content: "\2191"; }
+  .ream-dash table.rd-table th[aria-sort="descending"] button::after { content: "\2193"; }
+  .ream-dash table.rd-table td {
+    padding: var(--cds-pad-sm) var(--cds-pad-md);
+    border-bottom: 1px solid var(--color-border-line);
+    vertical-align: top;
+  }
+  .ream-dash table.rd-table td.rd-col-wide { max-width: 34ch; }
+  .ream-dash table.rd-table tr:last-child td { border-bottom: none; }
+  .ream-dash table.rd-table tr:hover td { background: color-mix(in srgb, var(--color-fg) 4%, transparent); }
+  .ream-dash .rd-empty-row td {
+    text-align: center;
+    color: var(--color-fg-muted);
+    padding: var(--cds-pad-lg);
+  }
+  .ream-dash .rd-count-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-sm) 0 0; }
+
+  .ream-dash .rd-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: var(--cds-font-size-caption);
+    white-space: nowrap;
+  }
+  .ream-dash .rd-status-chip::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: currentColor; flex: none; }
+  .ream-dash .rd-status-chip.st-ok { color: var(--color-ok); }
+  .ream-dash .rd-status-chip.st-warn { color: var(--color-warn); }
+  .ream-dash .rd-status-chip.st-bad { color: var(--color-bad); }
+  .ream-dash .rd-status-chip.st-muted { color: var(--color-fg-muted); }
+
+  .ream-dash .rd-detail-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cds-gap-md);
+    margin-bottom: var(--cds-gap-md);
+  }
+  .ream-dash .rd-detail-head label {
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin-right: var(--cds-gap-xs);
+  }
+  .ream-dash [data-dash-source-state="empty"] { color: transparent; }
+  .ream-dash .dash-skeleton {
+    background: linear-gradient(90deg, var(--color-border-line), color-mix(in srgb, var(--color-border-line) 40%, transparent), var(--color-border-line));
+    border-radius: 4px;
+    color: transparent !important;
+    min-height: 1em;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ream-dash [data-dash-source-state="refreshing"] { transition: opacity var(--cds-dur-slow) var(--cds-ease-out); opacity: 0.5; }
+  }
+
+</style>
+</head>
+<body>
+<div class="ream-page-wrap">
+
+
+<div class="ream-dash" style="--rd-accent:#2f6f66">
+  <header class="rd-header">
+    <div class="rd-header-left">
+      <span class="rd-logo-badge"><img src="ream_logo.png" alt="Logo REAM" width="200" height="168"></span>
+      <div>
+        <h1 class="rd-title">Dashboard de Manutenção · REAM</h1>
+        <p class="rd-sub" id="rd-takeaway">
+          <span class="dash-skeleton">Carregando indicadores da base de manutenção…</span>
+        </p>
+      </div>
+    </div>
+    <span class="rd-badge-scope" id="rd-scope-badge">23 posições de SE · semanas 37–42/2026</span>
+  </header>
+
+  <nav class="rd-tabs" role="tablist" aria-label="Seções do dashboard">
+    <button class="rd-tab" id="rd-tabbtn-geral" role="tab" aria-selected="true" aria-controls="rd-page-geral" data-page="geral">Visão geral</button>
+    <button class="rd-tab" id="rd-tabbtn-mapa" role="tab" aria-selected="false" aria-controls="rd-page-mapa" data-page="mapa">Mapa de SEs</button>
+    <button class="rd-tab" id="rd-tabbtn-detalhe" role="tab" aria-selected="false" aria-controls="rd-page-detalhe" data-page="detalhe">Detalhe da SE</button>
+    <button class="rd-tab" id="rd-tabbtn-pendencias" role="tab" aria-selected="false" aria-controls="rd-page-pendencias" data-page="pendencias">Pendências</button>
+  </nav>
+
+  <!-- ===================== VISÃO GERAL ===================== -->
+  <section class="rd-panel" id="rd-page-geral" role="tabpanel" aria-labelledby="rd-tabbtn-geral">
+    <div class="rd-kpis">
+      <div class="rd-card rd-kpi kpi-abertos" data-source="kpis">
+        <div class="rd-kpi-label">Abertos</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="abertos">—</div>
+        <div class="rd-kpi-note">Sem data de conclusão registrada</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-aguardando" data-source="kpis">
+        <div class="rd-kpi-label">Aguardando material/resumo</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="aguardandoMaterial">—</div>
+        <div class="rd-kpi-note" data-field="aguardandoResumo" data-note="resumo">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-programados" data-source="kpis">
+        <div class="rd-kpi-label">Programados</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="programados">—</div>
+        <div class="rd-kpi-note">Programação não comprova execução</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-concluidos" data-source="kpis">
+        <div class="rd-kpi-label">Concluídos</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="concluidos">—</div>
+        <div class="rd-kpi-note" data-field="pctConcluido" data-note="pct">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-registros" data-source="kpis">
+        <div class="rd-kpi-label">Registros históricos</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="total">—</div>
+        <div class="rd-kpi-note" data-field="sesComRegistro" data-note="ses">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-cadastro" data-source="kpis">
+        <div class="rd-kpi-label">Cadastro do parque</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="sesCadastradas">—</div>
+        <div class="rd-kpi-note" data-field="sesAcadastrar" data-note="acadastrar">—</div>
+      </div>
+    </div>
+    <p class="rd-footnote" id="rd-kpi-footnote" data-source="kpis" data-field="outros"></p>
+
+    <div class="rd-card">
+      <h2 class="rd-card-title">Resumo gerencial</h2>
+      <p class="rd-card-note" id="rd-resumo-note">Evolução semanal dos lançamentos e as SEs com maior backlog, lado a lado. Semanas 37 a 42/2026.</p>
+      <div class="rd-grid rd-grid-charts">
+        <div class="rd-chart-col">
+          <h3 class="rd-chart-subtitle">Evolução semanal</h3>
+          <div class="rd-legend" id="rd-semanal-legend"></div>
+          <div class="rd-chartbox" id="rd-semanal-chart" data-source="semanal"></div>
+        </div>
+        <div class="rd-chart-col rd-chart-col-divider">
+          <h3 class="rd-chart-subtitle">SEs com maior backlog</h3>
+          <p class="rd-chart-note">Abertos + aguardando material ou resumo. As 8 com mais itens não concluídos. Não inclui compartilhados nem cancelados/duplicados.</p>
+          <div class="rd-legend" id="rd-ranking-legend"></div>
+          <div class="rd-chartbox" id="rd-ranking-chart" data-source="por_se"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd-card">
+      <h2 class="rd-card-title">Carga de trabalho por categoria</h2>
+      <p class="rd-card-note" id="rd-categoria-note">Todos os 199 registros, agrupados por categoria e status.</p>
+      <div class="rd-legend" id="rd-categoria-legend"></div>
+      <div class="rd-chartbox" id="rd-categoria-chart" data-source="por_categoria"></div>
+    </div>
+
+    <div class="rd-card">
+      <h2 class="rd-card-title">Sobre esta base</h2>
+      <p class="rd-card-note" id="rd-sobre-base">
+        <span class="dash-skeleton">Carregando…</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== MAPA DE SES ===================== -->
+  <section class="rd-panel" id="rd-page-mapa" role="tabpanel" aria-labelledby="rd-tabbtn-mapa" hidden>
+    <p class="rd-card-note" style="margin-bottom: var(--cds-gap-sm)">
+      As posições confirmadas do parque. Clique em uma SE para abrir o histórico completo na aba Detalhe. Faixas: prioridade (10 ou mais pendentes), atenção (1 a 9), controlada (nenhum pendente).
+    </p>
+    <div class="rd-filters" style="margin-bottom: var(--cds-gap-md)">
+      <select id="rd-mapa-semana" aria-label="Filtrar por semana"><option value="">Todas as semanas</option></select>
+    </div>
+    <div class="rd-se-grid" id="rd-se-grid" data-source="por_se"></div>
+  </section>
+
+  <!-- ===================== DETALHE DA SE ===================== -->
+  <section class="rd-panel" id="rd-page-detalhe" role="tabpanel" aria-labelledby="rd-tabbtn-detalhe" hidden>
+    <div class="rd-detail-head">
+      <div>
+        <label for="rd-se-select">Subestação</label>
+        <select id="rd-se-select"></select>
+      </div>
+      <div>
+        <label for="rd-detail-semana">Semana</label>
+        <select id="rd-detail-semana"><option value="">Todas as semanas</option></select>
+      </div>
+    </div>
+
+    <div class="rd-kpis" id="rd-detail-kpis" data-source="por_se">
+      <div class="rd-card rd-kpi kpi-abertos">
+        <div class="rd-kpi-label">Abertos</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="abertos">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-aguardando">
+        <div class="rd-kpi-label">Aguardando material/resumo</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="aguardando">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-programados">
+        <div class="rd-kpi-label">Programados</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="programados">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-concluidos">
+        <div class="rd-kpi-label">Concluídos</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="concluidos">—</div>
+      </div>
+      <div class="rd-card rd-kpi kpi-registros">
+        <div class="rd-kpi-label">Registros</div>
+        <div class="rd-kpi-value dash-skeleton" data-field="registros">—</div>
+      </div>
+    </div>
+    <p class="rd-footnote" id="rd-detail-outros-note"></p>
+
+    <h2 class="rd-section-head">Histórico completo</h2>
+    <div class="rd-filters">
+      <input type="search" id="rd-detail-search" placeholder="Buscar na atividade, OM, responsável, operação/checklist…" aria-label="Buscar no histórico da SE">
+    </div>
+    <div class="rd-table-wrap">
+      <table class="rd-table" id="rd-detail-table" data-source="base" data-row-key="id">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="rd-count-note" id="rd-detail-count"></p>
+  </section>
+
+  <!-- ===================== PENDÊNCIAS ===================== -->
+  <section class="rd-panel" id="rd-page-pendencias" role="tabpanel" aria-labelledby="rd-tabbtn-pendencias" hidden>
+    <p class="rd-card-note" style="margin-bottom: var(--cds-gap-md)">
+      Itens ainda não concluídos: abertos, programados ou aguardando material/resumo técnico.
+    </p>
+    <div class="rd-filters">
+      <select id="rd-pend-semana" aria-label="Filtrar por semana"><option value="">Todas as semanas</option></select>
+      <select id="rd-pend-se" aria-label="Filtrar por SE"><option value="">Todas as SEs</option></select>
+      <select id="rd-pend-categoria" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+      <select id="rd-pend-status" aria-label="Filtrar por status">
+        <option value="">Todos os status pendentes</option>
+        <option value="Aberto">Aberto</option>
+        <option value="Programado">Programado</option>
+        <option value="Aguardando Material">Aguardando material</option>
+        <option value="Aguardando Resumo Técnico">Aguardando resumo técnico</option>
+      </select>
+      <input type="search" id="rd-pend-search" placeholder="Buscar na atividade, OM, responsável, operação/checklist…" aria-label="Buscar nas pendências">
+      <button class="rd-clear" id="rd-pend-clear" type="button">Limpar filtros</button>
+    </div>
+    <div class="rd-table-wrap">
+      <table class="rd-table" id="rd-pend-table" data-source="base" data-row-key="id">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="rd-count-note" id="rd-pend-count"></p>
+  </section>
+
+  <div class="rd-tooltip" id="rd-tooltip"></div>
+</div>
+
+
+</div>
+<script type="application/json" id="rd-embedded-data">{"base": [{"id": "SE5100-2026-S37-001", "semana": 37, "data": "2026-09-11", "se": "SE-5100", "atividade": "Inspecao semestral BT-5100-1B: nivel eletrolito OK (class.2), integridade OK, tampas/valvulas OK. Limpeza do banco e da sala realizada.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4023814", "observacao": "Fabricante LORICA. Temp. sala 38,7C - acima do ideal (~35C), acompanhar.", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5100-2026-S37-002", "semana": 37, "data": "2026-09-11", "se": "SE-5100", "atividade": "Polos e interligacoes com oxidacao significativa - necessita parada programada para desmontagem e limpeza geral", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Parada programada para desmontagem/limpeza", "responsavel": "Janilson Bonilha Lima", "om": "4023814", "observacao": "Identificado na inspecao semestral do banco de baterias", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5100-2026-S37-003", "semana": 37, "data": "2026-09-11", "se": "SE-5100", "atividade": "Suportes do banco de baterias com pintura deteriorada e descascando - necessita repintura", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nota de servico de pintura", "responsavel": "Janilson Bonilha Lima", "om": "4023814", "observacao": "Identificado na inspecao semestral do banco de baterias", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5100-2026-S37-004", "semana": 37, "data": "2026-09-11", "se": "SE-5100", "atividade": "Sistema de exaustao com acumulo de poeira nas pas, funcionamento pesado - necessita limpeza e revisao", "categoria": "Corretiva", "status": "Aguardando Material", "status_grupo": "Aguardando Material", "aguardando": "Montagem de andaime para acesso seguro ao exaustor", "responsavel": "Janilson Bonilha Lima", "om": "4023814", "observacao": "Obrigatorio andaime para acesso seguro", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5132-2026-S37-005", "semana": 37, "data": "2026-09-10", "se": "SE-5132", "atividade": "Preventiva trimestral BT-5132-1B: nivel eletrolito OK (class.2), sem oxidacao/corrosao, tampas/valvulas OK, exaustao operante. Conclusao: condicoes normais de operacao, sem condicoes emergenciais.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Norte Construtora", "om": "4023509", "observacao": "Fabricante TUDOR", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5132-2026-S37-006", "semana": 37, "data": "2026-09-10", "se": "SE-5132", "atividade": "Providenciar agua e solucao eletrolitica para acumuladores chumbo-acido, ja aditivada e com concentracao correta", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Estoque para atendimento futuro dos bancos de bateria (nao urgente)", "responsavel": "Norte Construtora", "om": "4023509", "observacao": "Recomendacao de estoque, nao e emergencia pontual", "operacao": "Banco de Baterias", "escopo": "SE"}, {"id": "SE5132-2026-S37-007", "semana": 37, "data": "2026-09-09", "se": "SE-5132", "atividade": "Termografia painel a painel do CCM-1 (33 pontos) programada", "categoria": "Preventiva", "status": "Cancelada/Duplicada", "status_grupo": "Cancelada/Duplicada", "aguardando": "", "responsavel": "-", "om": "4024480", "observacao": "William programou sem checar - servico ja executado no semestre anterior. Nao precisa reagendar por ora.", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SEADM-2026-S37-008", "semana": 37, "data": "2026-09-08", "se": "SE-ADM", "atividade": "Preventiva mensal executada: limpeza geral (paredes/teto/piso/paineis/transformadores), estado fisico OK, leitos/eletrocalhas OK, cabos e conexoes de aterramento reapertados, iluminacao interna/externa OK, exaustores OK, etiquetas/placas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "Resumo do tecnico responsavel", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024102", "observacao": "Supervisor REAM: Manoel Gomes de Almeida (Matr. 00296)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE450-2026-S37-009", "semana": 37, "data": "2026-09-11", "se": "SE-450", "atividade": "Preventiva mensal executada (OM 4024139): limpeza OK, edificacao/leitos/canaletas OK, aterramento reapertado, iluminacao interna/externa OK (testes automatico e manual), extintores OK, placas de identificacao OK, bastao de salvamento com ensaio valido (05/26, proximo 05/27), portas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "Resumo do tecnico responsavel", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024139", "observacao": "", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE8200-2026-S37-010", "semana": 37, "data": "2026-09-08", "se": "SE-8200", "atividade": "Preventiva mensal executada (OM 4024043): limpeza geral OK, edificacao OK, canaletas/leitos OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia sem anomalias", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "Resumo do tecnico responsavel", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "No SAP, equipamento aparece como 'SISTEMA' - tag SE-8200 so no texto da tarefa", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SECTR-2026-S37-011", "semana": 37, "data": "2026-09-10", "se": "SE-CTR", "atividade": "Preventiva mensal executada (OM 4024088): limpeza nos paineis OK, estado fisico em conformidade, tampa do quadro de iluminacao repintada", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "Resumo do tecnico responsavel", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024088", "observacao": "No SAP, equipamento aparece como 'PC-EWS05' - tag SE-CTR so no texto da tarefa", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SEADM-2026-S37-012", "semana": 37, "data": "2026-09-08", "se": "SE-ADM", "atividade": "Luminarias de emergencia queimadas - presentes no local mas nao funcionam, confirmado em teste", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Troca das luminarias de emergencia", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024102", "observacao": "Risco de seguranca - iluminacao de emergencia inoperante", "operacao": "Op.060 (Ilum. emergencia)", "escopo": "SE"}, {"id": "SEADM-2026-S37-013", "semana": 37, "data": "2026-09-08", "se": "SE-ADM", "atividade": "Porta principal nao fecha corretamente - mecanismo de fechamento (testeira) foi removido junto com o batedor", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparo/reposicao do mecanismo de fechamento da porta", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024102", "observacao": "", "operacao": "Op.130 (Portas externas)", "escopo": "SE"}, {"id": "SEADM-2026-S37-014", "semana": 37, "data": "2026-09-08", "se": "SE-ADM", "atividade": "Tapete isolante sem registro de data do ultimo ensaio dieletrico - sugerido novo ensaio", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Novo ensaio dieletrico do tapete isolante", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024102", "observacao": "Verificar tambem contra a planilha de controle de certificados de EPI isolante", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SECTR-2026-S37-015", "semana": 37, "data": "2026-09-09", "se": "SE-CTR", "atividade": "Palheira (vegetacao) se aproximando dos cabos de alimentacao e das chaves", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Capina/remocao da vegetacao (palheiro) para prevenir curto-circuito", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024088", "observacao": "Risco de curto-circuito", "operacao": "Adicional (fora do checklist)", "escopo": "SE"}, {"id": "SECTR-2026-S37-016", "semana": 37, "data": "2026-09-09", "se": "SE-CTR", "atividade": "Iluminacao viaria: 15 luminarias e 20 refletores queimados (35 no total)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituicao de todas as luminarias/refletores - necessita andaime ou plataforma elevatoria", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024088", "observacao": "Volume grande - avaliar contratacao de servico com equipamento de acesso", "operacao": "Op.050 (Iluminacao externa)", "escopo": "SE"}, {"id": "SE450-2026-S37-017", "semana": 37, "data": "2026-09-11", "se": "SE-450", "atividade": "Iluminacao de emergencia inexistente no local - so o suporte, luminaria ausente", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Instalacao de luminaria de emergencia", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024139", "observacao": "Risco de seguranca - mesma familia de achado ja visto em SE-ADM e SE-6000", "operacao": "Op.060 (Ilum. emergencia)", "escopo": "SE"}, {"id": "SE450-2026-S37-018", "semana": 37, "data": "2026-09-11", "se": "SE-450", "atividade": "Duas maquinas de ar-condicionado no local, ambas ligadas mas nao refrigerando o ambiente", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Acionar equipe de refrigeracao para manutencao das maquinas", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024139", "observacao": "", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE450-2026-S37-019", "semana": 37, "data": "2026-09-11", "se": "SE-450", "atividade": "Tapetes isolantes sem registro de ultimo ensaio nem data para o proximo", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio de isolamento dos tapetes", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024139", "observacao": "4a SE seguida com esse achado (ja visto em SE-ADM, SE-6000, SE-5132)", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE8200-2026-S37-020", "semana": 37, "data": "2026-09-09", "se": "SE-8200", "atividade": "Area dos transformadores com acesso gradeado no nivel da via - entrada constante de folhas, areia, poeira e residuos da rua; deposito adjacente com acumulo excessivo de sujeira", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Isolar area dos transformadores contra entrada de residuos; nova OS para limpeza geral do deposito", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "", "operacao": "Adicional (fora do checklist)", "escopo": "SE"}, {"id": "SE8200-2026-S37-021", "semana": 37, "data": "2026-09-09", "se": "SE-8200", "atividade": "Sala da SE-8200 NAO possui sistema de ventilacao/exaustao instalado - temperatura ambiente excessiva, condicao inadequada aos equipamentos e a seguranca", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Projetar e instalar sistema de ventilacao/exaustao", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "Risco a equipamentos e seguranca - nao e falha pontual, e ausencia de sistema", "operacao": "Op.070 (Ventilacao/exaustao)", "escopo": "SE"}, {"id": "SE8200-2026-S37-022", "semana": 37, "data": "2026-09-09", "se": "SE-8200", "atividade": "Sala da SE-8200 NAO possui sistema de ar-condicionado instalado - risco iminente de falha em equipamentos eletricos por temperatura excessiva", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar URGENTE nova OS para implantar sistema de circulacao e refrigeracao de ar", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "URGENTE conforme o proprio tecnico - risco iminente", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE8200-2026-S37-023", "semana": 37, "data": "2026-09-09", "se": "SE-8200", "atividade": "Manometros/etiquetas dos extintores conferidos pela ultima vez em junho/2026 - sem inspecao de julho, agosto e setembro", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Regularizar inspecao mensal dos extintores - 3 meses em atraso", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "Nao conformidade do sistema de protecao contra incendio", "operacao": "Op.090 (Extintores)", "escopo": "SE"}, {"id": "SE8200-2026-S37-024", "semana": 37, "data": "2026-09-09", "se": "SE-8200", "atividade": "Placa de identificacao da SE-8200 sem o TAG da subestacao - so tem as placas de advertencia (alta tensao, perigo de morte)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao principal (TAG) da SE-8200", "responsavel": "Janilson Bonilha Lima", "om": "4024043", "observacao": "", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE6000-2026-S38-025", "semana": 38, "data": "2026-09-14", "se": "SE-6000", "atividade": "Preventiva mensal executada (OM 4024140): limpeza geral, edificacao OK, canaletas/leitos/eletrocalhas OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia OK, exaustor/ventilacao OK, ar-condicionado OK, extintores dentro da validade, voltimetros/amperimetros OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Norte Construtora", "om": "4024140", "observacao": "", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE5132-2026-S38-026", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Preventiva mensal executada (OM 4024142): limpeza (sala paineis/poco cabos) OK, edificacao OK, leitos/eletrocalha/perfilado OK, cabos/aterramento OK, extintores/placas/instrumentos/portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE6310-2026-S38-027", "semana": 38, "data": "2026-09-15", "se": "SE-6310", "atividade": "Preventiva mensal executada (OM 4024141): limpeza geral OK, edificacao OK, componentes OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa OK, extintores OK, ar-condicionado OK, instrumentos (voltimetro/amperimetro/termometro) OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024141", "observacao": "SE confirmada por Iderlan como real (23a SE do parque REAM)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE4B-2026-S38-028", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "Preventiva mensal executada (OM 4024326): limpeza geral OK (ambiente limpo/organizado), edificacao OK, componentes/limpeza total OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia OK, extintores dentro da validade, voltimetros/amperimetros OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "Achados abertos ver linhas de pendencia abaixo (dedetizacao, correias M-VE-8250-07A/07B, AC-382, placa de identificacao, kit RF4)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE5143-2026-S38-029", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "Preventiva mensal executada (OM 4024351): limpeza geral OK, edificacao OK, componentes/limpeza total OK, cabos/aterramento/portas internas/janelas OK, iluminacao interna/externa OK, iluminacao de emergencia OK, extintores dentro da validade, placas de identificacao e advertencia OK, voltimetros/amperimetros OK, tapete isolante e bastao de resgate com ensaio valido (mai/2027)", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Ar-condicionado com 1 unidade em defeito (AC-382) - ver linha de pendencia abaixo", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE2111-2026-S38-030", "semana": 38, "data": "2026-09-17", "se": "SE-2111", "atividade": "Preventiva mensal executada (OM 4024437): limpeza geral OK, componentes/limpeza total OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia OK, exaustor/ventilacao OK, extintores dentro da validade, voltimetros/amperimetros/termometros OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024437", "observacao": "Achados abertos ver linhas de pendencia abaixo (infiltracao na laje, ar-condicionado inexistente, placa de identificacao, tapetes sem ensaio)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE2000-2026-S38-031", "semana": 38, "data": "2026-09-18", "se": "SE-2000", "atividade": "Preventiva mensal executada (OM 4024427): limpeza geral OK, edificacao OK, componentes/limpeza total OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia OK, exaustor/ventilacao OK, extintores dentro da validade, kit fardamento RF4 OK, bastao de resgate com ensaio valido (mai/2027), voltimetros/amperimetros/termometros OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024427", "observacao": "Achados abertos ver linhas de pendencia abaixo (ar-condicionado inexistente, placa de identificacao, tapetes sem ensaio)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE5100-2026-S38-032", "semana": 38, "data": "2026-09-18", "se": "SE-5100", "atividade": "Preventiva mensal executada (OM 4024428): limpeza geral OK, edificacao OK, componentes/limpeza total OK, cabos/aterramento/portas/janelas OK, iluminacao interna/externa/emergencia OK, exaustor/ventilacao OK, extintores dentro da validade, placa de identificacao OK, kit fardamento RF4 OK, bastao de resgate com ensaio valido (mai/2027), voltimetros/amperimetros/termometros OK, portas externas OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024428", "observacao": "Achados abertos ver linhas de pendencia abaixo (ar-condicionado inexistente, tapetes sem ensaio)", "operacao": "Multiplas (010-130 OK)", "escopo": "SE"}, {"id": "SE6000-2026-S38-033", "semana": 38, "data": "2026-09-14", "se": "SE-6000", "atividade": "Placa de identificacao da SE-6000 desgastada e quase ilegivel pelo tempo de uso", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar novas placas de identificacao e sinalizacao de seguranca obrigatoria (alta tensao, perigo de morte)", "responsavel": "Norte Construtora", "om": "4024140", "observacao": "Sinalizacao de seguranca obrigatoria - risco NR-10", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE6000-2026-S38-034", "semana": 38, "data": "2026-09-14", "se": "SE-6000", "atividade": "Etiqueta dos tapetes isolantes sem registro de ensaio de isolacao", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes", "responsavel": "Norte Construtora", "om": "4024140", "observacao": "Fardamento RF4, capuz c/ viseira, luvas RF4 e bastao de resgate OK no armario", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE6000-2026-S38-035", "semana": 38, "data": "2026-09-14", "se": "SE-6000", "atividade": "Prancha de resgate (area externa, piso superior, proximo a escada) sem os acessorios e materiais do conjunto completo", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reposicao imediata dos itens do kit de resgate", "responsavel": "Norte Construtora", "om": "4024140", "observacao": "Equipamento de emergencia incompleto - encaminhado a SMS. Prioridade de seguranca", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE6000-2026-S38-036", "semana": 38, "data": "2026-09-14", "se": "SE-6000", "atividade": "Pintura da fachada e corrimaos/guarda-corpo da escada desgastados pelo tempo", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova ordem de servico de pintura", "responsavel": "Norte Construtora", "om": "4024140", "observacao": "", "operacao": "Op.020 (Edificacao)", "escopo": "SE"}, {"id": "SE5132-2026-S38-037", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Iluminaria da entrada principal sem interruptor no circuito", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Instalacao de interruptor no circuito de iluminacao da entrada", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "Registro fotografico anexado ao relatorio original", "operacao": "Op.050 (Iluminacao)", "escopo": "SE"}, {"id": "SE5132-2026-S38-038", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Chave de acionamento da iluminacao de emergencia com mau funcionamento - reparada em campo (reaperto na base interna + ajuste da haste de acionamento)", "categoria": "Corretiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "Teste pos-reparo confirmou funcionamento normal", "operacao": "Op.060 (Ilum. emergencia)", "escopo": "SE"}, {"id": "SE5132-2026-S38-039", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Tapetes isolantes sem registro de data do ultimo ensaio de isolamento", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio de isolamento dos tapetes", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "3a SE seguida com esse mesmo achado (ja visto em SE-ADM e SE-6000)", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE5132-2026-S38-040", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Nenhum bastao de salvamento encontrado na subestacao", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar bastao de salvamento", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "Equipamento de seguranca/resgate ausente", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE5132-2026-S38-041", "semana": 38, "data": "2026-09-14", "se": "SE-5132", "atividade": "Fardamento Tipo 4 ainda com logo da empresa anterior", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar troca de identificacao/etiqueta do fardamento", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024142", "observacao": "Baixa prioridade - item cosmetico/identificacao", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE6310-2026-S38-042", "semana": 38, "data": "2026-09-15", "se": "SE-6310", "atividade": "Sala de paineis NAO possui iluminacao de emergencia instalada", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Instalacao do sistema de iluminacao de emergencia (seguranca e normas tecnicas)", "responsavel": "Janilson Bonilha Lima", "om": "4024141", "observacao": "5a SE com achado de iluminacao de emergencia (ADM, 450, 6310 sem/inexistente)", "operacao": "Op.060 (Ilum. emergencia)", "escopo": "SE"}, {"id": "SE6310-2026-S38-043", "semana": 38, "data": "2026-09-15", "se": "SE-6310", "atividade": "SE-6310 nao possui sistema de ventilacao e exaustao instalado", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Projetar e instalar sistema de ventilacao/exaustao", "responsavel": "Janilson Bonilha Lima", "om": "4024141", "observacao": "3o caso deste tipo (junto com SE-8200) - padrao de climatizacao", "operacao": "Op.070 (Ventilacao/exaustao)", "escopo": "SE"}, {"id": "SE6310-2026-S38-044", "semana": 38, "data": "2026-09-15", "se": "SE-6310", "atividade": "Placa de identificacao de advertencia faltando: Perigo Alta Tensao de Morte", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de advertencia (perigo alta tensao/morte)", "responsavel": "Janilson Bonilha Lima", "om": "4024141", "observacao": "", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE6310-2026-S38-045", "semana": 38, "data": "2026-09-15", "se": "SE-6310", "atividade": "NAO TEM tapete isolante, NAO TEM kit fardamento tipo RF4, NAO TEM bastao de resgate na subestacao", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar EPI isolante completo: tapete, fardamento RF4 e bastao de resgate", "responsavel": "Janilson Bonilha Lima", "om": "4024141", "observacao": "MAIS GRAVE que os outros casos - aqui o equipamento nem existe (nos outros so faltava ensaio). Sem esse kit, nao se pode intervir com seguranca nessa SE.", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE5143-2026-S38-046", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "Presenca recorrente de aranhas e insetos na SE - identificado na limpeza geral e na area dos motores de ventilacao", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar OS para equipe de dedetizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Mesma recomendacao ja vista em outras SEs (dedetizacao)", "operacao": "Op.010 (Limpeza geral)", "escopo": "SE"}, {"id": "SE5143-2026-S38-047", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "Motores de ventilacao/exaustao M-VE-8250-07A e 07B com apenas 2 das 4 correias instaladas (1 danificada em cada); M-VE-8250-07C sem nenhuma das 4 correias - parado", "categoria": "Corretiva", "status": "Compartilhado", "status_grupo": "Compartilhado", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Mesmo achado/equipamento da SE-4B (OM 4024326, linha 32) - motores M-VE-8250 compartilhados entre as duas SEs (unidade U-5140); ver linha correspondente para a OS unica", "operacao": "Op.070 (Ventilacao/exaustao)", "escopo": "SE"}, {"id": "SE5143-2026-S38-048", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "Ar-condicionado AC-382 com defeito (demais unidades operando normal)", "categoria": "Corretiva", "status": "Compartilhado", "status_grupo": "Compartilhado", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Mesmo achado/equipamento da SE-4B (OM 4024326, linha 33) - AC-382 compartilhado entre as duas SEs (unidade U-5140); ver linha correspondente para a OS unica", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE5143-2026-S38-049", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "SE-5143 NAO TEM o kit de fardamento tipo RF4 (tapete isolante e bastao de resgate presentes, com ensaio valido ate mai/2027)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar kit de fardamento RF4", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Padrao EPI isolante, variante parcial: diferente da SE-6310 (nada existe) e das demais SEs (existe mas falta ensaio) - aqui falta 1 dos 3 itens do kit", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE5143-2026-S38-050", "semana": 38, "data": "2026-09-17", "se": "SE-5143", "atividade": "Portas externas (lado esquerdo) com dobradicas quebradas e barra da fechadura quebrada/com defeito", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar OS a equipe de manutencao civil para reparo imediato", "responsavel": "Janilson Bonilha Lima", "om": "4024351", "observacao": "Risco de entrada de animais e exposicao dos equipamentos eletricos", "operacao": "Op.130 (Portas externas)", "escopo": "SE"}, {"id": "SE4B-2026-S38-051", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "Presenca de aranhas e insetos no ambiente - identificado na limpeza geral", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar OS para equipe de dedetizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "Mesma recomendacao ja vista em outras SEs (dedetizacao recorrente)", "operacao": "Op.010 (Limpeza geral)", "escopo": "SE"}, {"id": "SE4B-2026-S38-052", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "Motores de ventilacao/exaustao M-VE-8250-07A, 07B e 07C (equipamento compartilhado entre SE-4B e SE-5143, unidade U-5140): 07A e 07B com apenas 2 das 4 correias instaladas (1 danificada em cada); 07C sem nenhuma das 4 correias - parado", "categoria": "Corretiva", "status": "Aguardando Material", "status_grupo": "Aguardando Material", "aguardando": "Reposicao e instalacao das 4 correias faltantes/danificadas", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "Equipamento comum as duas SEs (mesma unidade U-5140) - achado espelhado na SE-5143 (OM 4024351, linha 27), marcada como Compartilhado para nao duplicar a OS", "operacao": "Op.070 (Ventilacao/exaustao)", "escopo": "SE"}, {"id": "SE4B-2026-S38-053", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "Ar-condicionado AC-382 com defeito (demais unidades operando normal)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar OS para equipe de manutencao de refrigeracao verificar o AC-382", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "Equipamento de climatizacao comum a SE-4B e SE-5143 (mesma unidade U-5140) - achado espelhado na SE-5143 (OM 4024351, linha 28), marcada como Compartilhado para nao duplicar a OS", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE4B-2026-S38-054", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "Placas de identificacao da SE-4B ausentes (subestacao sem placa de identificacao)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao da subestacao", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE4B-2026-S38-055", "semana": 38, "data": "2026-09-16", "se": "SE-4B", "atividade": "SE-4B NAO TEM o kit de fardamento tipo RF4 (tapete isolante e bastao de resgate presentes, com ensaio valido ate mai/2027)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar kit de fardamento RF4", "responsavel": "Janilson Bonilha Lima", "om": "4024326", "observacao": "Padrao EPI isolante ja visto em outras SEs (SE-5143, SE-6310)", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE2111-2026-S38-056", "semana": 38, "data": "2026-09-17", "se": "SE-2111", "atividade": "Laje da sala de paineis com infiltracao ativa - manchas de umidade nas frestas do teto", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS direcionada a equipe civil (fechamento das frestas no teto da laje)", "responsavel": "Janilson Bonilha Lima", "om": "4024437", "observacao": "", "operacao": "Op.020 (Edificacao)", "escopo": "SE"}, {"id": "SE2111-2026-S38-057", "semana": 38, "data": "2026-09-17", "se": "SE-2111", "atividade": "SE-2111 NAO TEM sistema de ar-condicionado instalado na sala de paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes eletricos", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "Janilson Bonilha Lima", "om": "4024437", "observacao": "Padrao ja visto em outras SEs (SE-8200, SE-6310) - ver 4 PADROES SISTEMICOS no resumo", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE2111-2026-S38-058", "semana": 38, "data": "2026-09-17", "se": "SE-2111", "atividade": "SE-2111 esta SEM placa de identificacao e SEM TAG da subestacao (encontra-se somente a placa de advertencia de perigo alta tensao/morte)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao/TAG SE-2111", "responsavel": "Janilson Bonilha Lima", "om": "4024437", "observacao": "", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE2111-2026-S38-059", "semana": 38, "data": "2026-09-17", "se": "SE-2111", "atividade": "Tapetes isolantes sem registro de ensaio", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes imediatamente (recomendacao do tecnico)", "responsavel": "Janilson Bonilha Lima", "om": "4024437", "observacao": "Kit fardamento RF4/balaclava/capacete/luva RF OK (armario); bastao de resgate com ensaio valido (mai/2027)", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE2000-2026-S38-060", "semana": 38, "data": "2026-09-18", "se": "SE-2000", "atividade": "SE-2000 NAO TEM sistema de ar-condicionado instalado na sala dos paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao urgente", "responsavel": "Janilson Bonilha Lima", "om": "4024427", "observacao": "Padrao ja visto em outras SEs (SE-8200, SE-6310, SE-2111) - ver 4 PADROES SISTEMICOS no resumo", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE2000-2026-S38-061", "semana": 38, "data": "2026-09-18", "se": "SE-2000", "atividade": "SE-2000 NAO TEM placa de identificacao da subestacao", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao SE-2000", "responsavel": "Janilson Bonilha Lima", "om": "4024427", "observacao": "", "operacao": "Op.100 (Placa identificacao)", "escopo": "SE"}, {"id": "SE2000-2026-S38-062", "semana": 38, "data": "2026-09-18", "se": "SE-2000", "atividade": "Tapetes isolantes sem registro de ensaio", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes", "responsavel": "Janilson Bonilha Lima", "om": "4024427", "observacao": "", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE5100-2026-S38-063", "semana": 38, "data": "2026-09-18", "se": "SE-5100", "atividade": "SE-5100 NAO TEM sistema de ar-condicionado instalado na sala dos paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes eletricos", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "Janilson Bonilha Lima", "om": "4024428", "observacao": "Padrao ja visto em outras SEs (SE-8200, SE-6310, SE-2111, SE-2000) - ver 4 PADROES SISTEMICOS no resumo", "operacao": "Op.080 (Ar-condicionado)", "escopo": "SE"}, {"id": "SE5100-2026-S38-064", "semana": 38, "data": "2026-09-18", "se": "SE-5100", "atividade": "Tapetes isolantes sem registro de ensaio", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar ensaio dos tapetes", "responsavel": "Janilson Bonilha Lima", "om": "4024428", "observacao": "Kit fardamento RF4 OK; bastao de resgate com ensaio valido (mai/2027)", "operacao": "Op.110 (EPI isolante)", "escopo": "SE"}, {"id": "SE410-2026-S39-065", "semana": 39, "data": "2026-09-21", "se": "SE-410", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza, edificacao, canaletas, cabos/aterramento, iluminacao, exaustores, extintores, voltimetros/amperimetros e portas externas sem anomalias. Achados: sala sem ar-condicionado (temperatura excessiva), placa sem TAG da SE, tapetes sem registro de ensaio.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024496", "observacao": "", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE8244-2026-S39-066", "semana": 39, "data": "2026-09-22", "se": "SE-8244", "atividade": "Checklist padrao de preventiva (13 etapas) realizado (010 a 130). Achados: tapetes isolantes sem etiqueta de validade de ensaio, subestacao sem ar-condicionado, trafo 13,8kV/440V sem TAG de identificacao na base, faltam 2 tomadas no predio do trafo a seco.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Claudionor de Oliveira", "om": "4024497", "observacao": "SE nova no controle diario (Vila das Empreiteiras) - confirmar dados cadastrais com o Planejamento", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE5121-2026-S39-067", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza, canaletas, cabos/aterramento, iluminacao, extintores, voltimetros/amperimetros e portas externas sem anomalias. Achados: laje com infiltracao ativa, sem ventilacao/exaustao instalada, ar-condicionado com barulho intenso, placa sem TAG, tapetes sem ensaio.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "SE nova no controle diario", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE5334-2026-S39-068", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza, edificacao, componentes, cabos/aterramento, iluminacao interna/externa sem anomalias. Achados: sala de paineis SEM iluminacao de emergencia instalada; motor de ventilacao VE-01A funcionando com dificuldade (rodando pesado) e motor VE-01B com barulho intenso (possivel defeito); sala sem ar-condicionado instalado (temperatura excessiva); necessidade de dedetizacao (aranhas/insetos); placa de identificacao da SE-5334 visivel, mas falta a placa de advertencia (perigo alta tensao/morte).", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "Checklist 010-100 concluido", "escopo": "SE"}, {"id": "SE710-2026-S39-069", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza geral, cabos, extintores e iluminacao interna/externa/emergencia sem anomalias. Achados (relatorio mais completo recebido em 30/09): sala sem ventilacao/exaustao instalada; sala sem sistema de ar-condicionado instalado (temperatura elevada, risco para equipamentos e seguranca); porta da SE sem placa de identificacao/TAG e sem placa de advertencia (perigo alta tensao/morte); tapetes isolantes sem registro de ensaio; pintura da fachada e corrimao do guarda-corpo desgastados; necessidade de capina na area da baia do transformador 710-1.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "-", "om": "4024527", "observacao": "Relatorio mais legivel recebido em 30/09 revelou achados adicionais nao capturados na 1a leitura (foto anterior estava com baixa qualidade)", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE5142-2026-S39-070", "semana": 39, "data": "2026-09-21", "se": "SE-5142", "atividade": "Inspecao de SPDA realizada: 4 captores tipo Franklin, 8 caixas de inspecao no solo", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5142 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE6000-2026-S39-071", "semana": 39, "data": "2026-09-21", "se": "SE-6000", "atividade": "Inspecao de SPDA realizada: 10 descidas de escoamento, 10 caixas de inspecao de descida, 9 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-6000 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE2000-2026-S39-072", "semana": 39, "data": "2026-09-22", "se": "SE-2000", "atividade": "Inspecao de SPDA realizada: 5 descidas de escoamento, 4 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-2000 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE2111-2026-S39-073", "semana": 39, "data": "2026-09-22", "se": "SE-2111", "atividade": "Inspecao de SPDA realizada: 10 descidas de escoamento, 8 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-2111 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE410-2026-S39-074", "semana": 39, "data": "2026-09-22", "se": "SE-410", "atividade": "Inspecao de SPDA realizada: 8 descidas de escoamento, 4 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-410 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE450-2026-S39-075", "semana": 39, "data": "2026-09-22", "se": "SE-450", "atividade": "Inspecao de SPDA realizada: 2 captores tipo Franklin, 31 mini captores, 9 caixas de inspecao de descida, 3 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-450 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE4B-2026-S39-076", "semana": 39, "data": "2026-09-23", "se": "SE-4B", "atividade": "Inspecao de SPDA realizada: 5 descidas de escoamento, 3 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-4B abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5100-2026-S39-077", "semana": 39, "data": "2026-09-23", "se": "SE-5100", "atividade": "Inspecao de SPDA realizada: 9 descidas de escoamento, 3 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5100 abaixo. OM 4024815 CONCLUIDA (20 de 20 pontos) - continuacao retomada e finalizada entre 28/09 e 01/10.", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5121-2026-S39-078", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "Inspecao de SPDA realizada: 2 descidas de escoamento, 1 caixa de inspecao no solo; para-raios Franklin nas proximidades (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencia detalhada na linha SPDA - SE-5121 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5131-2026-S39-079", "semana": 39, "data": "2026-09-24", "se": "SE-5131", "atividade": "Inspecao de SPDA realizada: 13 descidas de escoamento, 13 caixas de inspecao de descida, 1 caixa de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5131 abaixo. SE nova no controle diario (ja constava no PRO-MAN-0003)", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5132-2026-S39-080", "semana": 39, "data": "2026-09-24", "se": "SE-5132", "atividade": "Inspecao de SPDA realizada: 15 descidas de escoamento, 5 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5132 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5143-2026-S39-081", "semana": 39, "data": "2026-09-24", "se": "SE-5143", "atividade": "Inspecao de SPDA realizada: 5 descidas de escoamento, 1 caixa de inspecao no solo - sistema integrado ao da SE-4B (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5143 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5334-2026-S39-082", "semana": 39, "data": "2026-09-24", "se": "SE-5334", "atividade": "Inspecao de SPDA realizada: aprox. 30 mini captores, 10 descidas de escoamento, 10 caixas de inspecao de descida, 9 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-5334 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE710-2026-S39-083", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Inspecao de SPDA realizada: 10 descidas de escoamento, 10 caixas de inspecao de descida, 8 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-710 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE8200-2026-S39-084", "semana": 39, "data": "2026-09-25", "se": "SE-8200", "atividade": "Inspecao de SPDA realizada: sistema compartilhado com o Predio do Laboratorio (4 captores Franklin, 4 descidas, 22 caixas de inspecao no solo - 12 pertencentes a esta SE)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-8200 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE8224-2026-S39-085", "semana": 39, "data": "2026-09-25", "se": "SE-8224", "atividade": "Inspecao de SPDA realizada: 2 captores tipo Franklin, 2 descidas de escoamento, 2 caixas de inspecao no solo (protecao pontual)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencia detalhada na linha SPDA - SE-8224 abaixo. Distinto da OM 4024696 (preventiva mensal, ver linha 6 da SEMANA_40)", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5100-2026-S39-086", "semana": 39, "data": "2026-09-23", "se": "SE-5100", "atividade": "Descida de escoamento numero 04 rompida e/ou desconectada", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar/reconectar a descida 04", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - descidas", "escopo": "SE"}, {"id": "SE5100-2026-S39-087", "semana": 39, "data": "2026-09-23", "se": "SE-5100", "atividade": "Eletrodutos das descidas 01, 06 e 09 cortados; eletroduto da descida 02 quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir/reparar os 4 eletrodutos danificados", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - eletrodutos", "escopo": "SE"}, {"id": "SE5100-2026-S39-088", "semana": 39, "data": "2026-09-23", "se": "SE-5100", "atividade": "Apenas as descidas 07, 08 e 09 possuem caixa de inspecao de descida; demais 6 descidas sem caixa", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 6 descidas restantes", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE410-2026-S39-089", "semana": 39, "data": "2026-09-22", "se": "SE-410", "atividade": "Nenhuma das 8 descidas de escoamento possui caixa de inspecao de descida", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar 8 caixas de inspecao de descida", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE410-2026-S39-090", "semana": 39, "data": "2026-09-22", "se": "SE-410", "atividade": "Eletrodutos das descidas 05 e 08 quebrados; caixas de inspecao no solo precisam de limpeza, areia/pedra brita e troca de conectores", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar eletrodutos + servico de limpeza/conectores nas caixas no solo", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - eletrodutos", "escopo": "SE"}, {"id": "SE450-2026-S39-091", "semana": 39, "data": "2026-09-22", "se": "SE-450", "atividade": "Captores tipo Franklin das descidas 02, 07 e 08 quebrados", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir os 3 captores quebrados", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - captores", "escopo": "SE"}, {"id": "SE450-2026-S39-092", "semana": 39, "data": "2026-09-22", "se": "SE-450", "atividade": "Isolador do ponto 08 quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir isolador", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - isoladores", "escopo": "SE"}, {"id": "SE450-2026-S39-093", "semana": 39, "data": "2026-09-22", "se": "SE-450", "atividade": "Caixas de inspecao no solo (01 a 08) precisam de limpeza, areia/pedra brita no fundo e troca de conectores", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE450-2026-S39-094", "semana": 39, "data": "2026-09-22", "se": "SE-450", "atividade": "Caixa de inspecao no solo 02 com tampa de concreto quebrada", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar nova tampa de concreto", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - tampas", "escopo": "SE"}, {"id": "SE2000-2026-S39-095", "semana": 39, "data": "2026-09-22", "se": "SE-2000", "atividade": "Somente a descida 02 possui caixa de inspecao de descida; demais 4 descidas sem caixa", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao nas 4 descidas restantes", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE2000-2026-S39-096", "semana": 39, "data": "2026-09-22", "se": "SE-2000", "atividade": "Caixas de inspecao no solo precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE2111-2026-S39-097", "semana": 39, "data": "2026-09-22", "se": "SE-2111", "atividade": "Nenhuma das 10 descidas de escoamento possui caixa de inspecao de descida", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar 10 caixas de inspecao de descida", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE2111-2026-S39-098", "semana": 39, "data": "2026-09-22", "se": "SE-2111", "atividade": "Descida 02 com eletroduto quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar eletroduto", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - eletrodutos", "escopo": "SE"}, {"id": "SE2111-2026-S39-099", "semana": 39, "data": "2026-09-22", "se": "SE-2111", "atividade": "Eletroduto da descida 09 sem abracadeira de fixacao (2 polegadas)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar abracadeira de 2 pol", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - eletrodutos", "escopo": "SE"}, {"id": "SE2111-2026-S39-100", "semana": 39, "data": "2026-09-22", "se": "SE-2111", "atividade": "Caixa de inspecao no solo 04 sem tampa", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar tampa", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - tampas", "escopo": "SE"}, {"id": "SE6000-2026-S39-101", "semana": 39, "data": "2026-09-21", "se": "SE-6000", "atividade": "Descida 07 com isoladores quebrados; caixa e eletroduto empenados", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir isoladores + reparar caixa/eletroduto", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - isoladores", "escopo": "SE"}, {"id": "SE6000-2026-S39-102", "semana": 39, "data": "2026-09-21", "se": "SE-6000", "atividade": "Caixas de inspecao no solo 01, 02, 07 e 09 sem tampas", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar/instalar tampas", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - tampas", "escopo": "SE"}, {"id": "SE5142-2026-S39-103", "semana": 39, "data": "2026-09-21", "se": "SE-5142", "atividade": "Caixas de inspecao no solo 01 a 04 precisam de limpeza e troca de conectores", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5142-2026-S39-104", "semana": 39, "data": "2026-09-21", "se": "SE-5142", "atividade": "Caixas de inspecao no solo 05 a 08 precisam de limpeza, troca de conectores e confeccao de tampas de concreto (quebradas)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores + tampas novas", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - tampas", "escopo": "SE"}, {"id": "SE5100-2026-S39-105", "semana": 39, "data": "2026-09-22", "se": "SE-5100", "atividade": "Corretiva realizada: limpeza geral da sala de paineis da UTR, remocao de poeira/teias/detritos, ambiente organizado. Achado: AR-condicionado 2 nao refrigera (so ventila), temperatura da sala elevada; AR-condicionado 1 funciona mas com capacidade insuficiente.", "categoria": "Corretiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024769", "observacao": "2 frentes: eletrica (ELETCOT1) + tecnico de automacao (TECAUTOM)", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE410-2026-S39-106", "semana": 39, "data": "2026-09-23", "se": "SE-410", "atividade": "Corretiva programada: avaliar/corrigir nivel do banco de baterias BT-410-1A. Avaliacao em campo realizada (25/09) - NAO foi possivel corrigir o nivel conforme previsto: o banco de baterias BT-410-1A precisa de manutencao corretiva mais abrangente (substituicao/reparo).", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Abertura de nova OM corretiva para reparo/substituicao do banco de baterias BT-410-1A", "responsavel": "Ademario Oliveira / Ramon Peixoto / Fabricio Fernandes", "om": "4024775", "observacao": "PT 1000023565-2026; fiscal Manoel Gomes de Almeida; servico em campo 25/09 09:00-16:50", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5143-2026-S39-107", "semana": 39, "data": "2026-09-24", "se": "SE-5143", "atividade": "Corretiva programada: avaliar/corrigir falha no painel PN-5143-1 (contactora em falha). Executado (25/09): analise do sistema eletrico dos ventiladores da SE-5143 - equipamento estava desligado com rele termico atuado; apos rearme operou normalmente. Causa identificada: motor eletrico operando com apenas uma correia, sobrecarregando o rele termico. Equipamento desligado para substituicao da correia (servico encaminhado para mecanica).", "categoria": "Corretiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "David Edwards", "om": "4024784", "observacao": "PT 1000023579-2026; gerou 3 pendencias (ver linhas abaixo); fiscal/supervisor Manoel Gomes de Almeida", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-108", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "SE-710 NAO TEM sistema de ar-condicionado instalado na sala de paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes eletricos", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE410-2026-S39-109", "semana": 39, "data": "2026-09-21", "se": "SE-410", "atividade": "SE-410 NAO TEM sistema de ar-condicionado instalado na sala de paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes eletricos", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "Janilson Bonilha Lima", "om": "4024496", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE410-2026-S39-110", "semana": 39, "data": "2026-09-21", "se": "SE-410", "atividade": "Placa de identificacao da SE-410 esta sem o TAG da subestacao - so tem a de advertencia (perigo alta tensao de morte)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao com TAG SE-410", "responsavel": "Janilson Bonilha Lima", "om": "4024496", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE410-2026-S39-111", "semana": 39, "data": "2026-09-21", "se": "SE-410", "atividade": "Tapetes isolantes sem registro de ensaio de isolacao", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes", "responsavel": "Janilson Bonilha Lima", "om": "4024496", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8244-2026-S39-112", "semana": 39, "data": "2026-09-22", "se": "SE-8244", "atividade": "Tapetes isolantes sem etiqueta de validade de ensaio", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes", "responsavel": "Claudionor de Oliveira", "om": "4024497", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8244-2026-S39-113", "semana": 39, "data": "2026-09-22", "se": "SE-8244", "atividade": "SE-8244 NAO TEM sistema de ar-condicionado instalado", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "Claudionor de Oliveira", "om": "4024497", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8244-2026-S39-114", "semana": 39, "data": "2026-09-22", "se": "SE-8244", "atividade": "Trafo 13,8kV/440V sem TAG de identificacao na base", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa/TAG de identificacao no trafo", "responsavel": "Claudionor de Oliveira", "om": "4024497", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8244-2026-S39-115", "semana": 39, "data": "2026-09-22", "se": "SE-8244", "atividade": "Faltam 2 tomadas no predio do trafo a seco", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar as 2 tomadas", "responsavel": "Claudionor de Oliveira", "om": "4024497", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5121-2026-S39-116", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "Laje da sala de paineis com infiltracao ativa (manchas de umidade nas frestas do teto)", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS civil para fechamento das frestas no teto da laje", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5121-2026-S39-117", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "SE-5121 NAO possui sistema de ventilacao e exaustao instalado", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar ventilacao/exaustao", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5121-2026-S39-118", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "Ar-condicionado funcionando com barulho intenso (possivel defeito no compressor/ventilador)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar inspecao/manutencao do ar-condicionado", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5121-2026-S39-119", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "SE-5121 esta sem placa de identificacao - so tem a de advertencia, sem o TAG SE-5121", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao com TAG SE-5121", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5121-2026-S39-120", "semana": 39, "data": "2026-09-23", "se": "SE-5121", "atividade": "Tapetes isolantes sem registro de ensaio de isolacao", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes", "responsavel": "Janilson Bonilha Lima", "om": "4024514", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5100-2026-S39-121", "semana": 39, "data": "2026-09-22", "se": "SE-5100", "atividade": "AR-condicionado 2 da sala da UTR nao refrigera (so ventila) - temperatura da sala elevada; AR-condicionado 1 funciona mas com capacidade insuficiente", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Emitir nova OS para equipe de refrigeracao inspecionar e reparar o ar-condicionado 2", "responsavel": "Janilson Bonilha Lima", "om": "4024769", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S39-122", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "SE-5334 sala de paineis SEM iluminacao de emergencia instalada", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar instalacao do sistema de iluminacao de emergencia", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S39-123", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "Motor de ventilacao VE-01A funcionando com dificuldade (rodando pesado) e motor VE-01B com barulho intenso (possivel defeito)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar inspecao/manutencao dos motores de ventilacao VE-01A e VE-01B", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S39-124", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "SE-5334 NAO TEM sistema de ar-condicionado instalado na sala de paineis - temperatura excessiva, risco iminente de falha em equipamentos/componentes eletricos", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar climatizacao/refrigeracao", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S39-125", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "Presenca de aranhas e insetos na SE-5334", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de dedetizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S39-126", "semana": 39, "data": "2026-09-28", "se": "SE-5334", "atividade": "SE-5334 esta sem a placa de advertencia (perigo alta tensao/morte); placa de identificacao da SE esta OK", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de advertencia de perigo alta tensao", "responsavel": "Janilson Bonilha Lima", "om": "4024515", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-127", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "SE-710 NAO possui sistema de ventilacao/exaustao instalado", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar ventilacao/exaustao", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-128", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Porta da SE-710 sem placa de identificacao (sem o TAG da subestacao) e sem placa de advertencia (perigo alta tensao/morte)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao com TAG SE-710 e placa de advertencia", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-129", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Tapetes isolantes da SE-710 sem registro de ensaio de isolacao", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-130", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Pintura da fachada e corrimao do guarda-corpo desgastados pelo tempo", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de pintura da fachada e reparo do corrimao", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE710-2026-S39-131", "semana": 39, "data": "2026-09-25", "se": "SE-710", "atividade": "Mato/vegetacao na area da baia do transformador 710-1", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de capina na area da baia do transformador", "responsavel": "-", "om": "4024527", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5143-2026-S39-132", "semana": 39, "data": "2026-09-25", "se": "SE-5143", "atividade": "Painel PN-5143-2 com seccionadores quebrados - necessario substituir", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Abrir nota/OS para substituicao dos seccionadores do painel PN-5143-2", "responsavel": "Manoel Gomes de Almeida", "om": "4024784", "observacao": "Achado durante avaliacao dos ventiladores da SE-5143 em 25/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5143-2026-S39-133", "semana": 39, "data": "2026-09-25", "se": "SE-5143", "atividade": "Motor de ventilacao MVE-8250-07B travado - desarma o rele termico ao ser acionado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Abrir nota para mecanica retirar as correias e identificar o que esta travando o motor", "responsavel": "Manoel Gomes de Almeida", "om": "4024784", "observacao": "Achado durante avaliacao dos ventiladores da SE-5143 em 25/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5143-2026-S39-134", "semana": 39, "data": "2026-09-25", "se": "SE-5143", "atividade": "Correias dos ventiladores MVE-8250-07A e MVE-8250-07C precisam ser substituidas", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Abrir nota para troca das correias", "responsavel": "Manoel Gomes de Almeida", "om": "4024784", "observacao": "Achado durante avaliacao dos ventiladores da SE-5143 em 25/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE4B-2026-S39-135", "semana": 39, "data": "2026-09-28", "se": "SE-4B", "atividade": "Descidas de escoamento (5) sem caixa de inspecao de descida; eletrodutos existentes de 3/4 polegada", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 5 descidas (eletrodutos 3/4\")", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE4B-2026-S39-136", "semana": 39, "data": "2026-09-28", "se": "SE-4B", "atividade": "Caixas de inspecao no solo precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE4B-2026-S39-137", "semana": 39, "data": "2026-09-28", "se": "SE-4B", "atividade": "Eletroduto da descida de escoamento 04 quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar/substituir eletroduto da descida 04", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - eletrodutos", "escopo": "SE"}, {"id": "SE5143-2026-S39-138", "semana": 39, "data": "2026-09-28", "se": "SE-5143", "atividade": "Descidas de escoamento (5) sem caixa de inspecao de descida; eletrodutos no local com 3/4 polegada", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 5 descidas (eletrodutos 3/4\")", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE5143-2026-S39-139", "semana": 39, "data": "2026-09-28", "se": "SE-5143", "atividade": "Caixa de inspecao no solo precisa de limpeza e troca da conexao presente", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + troca do conector", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5121-2026-S39-140", "semana": 39, "data": "2026-09-28", "se": "SE-5121", "atividade": "Descidas de escoamento (2) sem caixa de inspecao de descida; eletrodutos presentes com 2 polegadas", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 2 descidas (eletrodutos 2\")", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE710-2026-S39-141", "semana": 39, "data": "2026-09-29", "se": "SE-710", "atividade": "Caixa de inspecao no solo 08 sem tampa (identificacao das caixas 06, 07 e 08 foi feita durante a inspecao)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar tampa de concreto para a caixa 08", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - tampas", "escopo": "SE"}, {"id": "SE710-2026-S39-142", "semana": 39, "data": "2026-09-29", "se": "SE-710", "atividade": "Isolador proximo a descida de escoamento 08 quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir isolador", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - isoladores", "escopo": "SE"}, {"id": "SE710-2026-S39-143", "semana": 39, "data": "2026-09-29", "se": "SE-710", "atividade": "Descida de escoamento 07 com o cabo rompido", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar/reconectar a descida 07", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - descidas", "escopo": "SE"}, {"id": "SE710-2026-S39-144", "semana": 39, "data": "2026-09-29", "se": "SE-710", "atividade": "Captor proximo a descida de escoamento 06 quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir captor", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - captores", "escopo": "SE"}, {"id": "SE5131-2026-S39-145", "semana": 39, "data": "2026-09-29", "se": "SE-5131", "atividade": "Caixa de inspecao de descida numero 03 quebrada", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar/substituir caixa de inspecao de descida 03", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE5131-2026-S39-146", "semana": 39, "data": "2026-09-29", "se": "SE-5131", "atividade": "Caixa de inspecao no solo precisa de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5132-2026-S39-147", "semana": 39, "data": "2026-09-29", "se": "SE-5132", "atividade": "Todas as 15 descidas de escoamento sem caixa de inspecao de descida; eletrodutos encontrados com 2 polegadas", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 15 descidas (eletrodutos 2\")", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE5132-2026-S39-148", "semana": 39, "data": "2026-09-29", "se": "SE-5132", "atividade": "Caixas de inspecao no solo precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE8200-2026-S39-149", "semana": 39, "data": "2026-09-30", "se": "SE-8200", "atividade": "Captor tipo Franklin do ponto 01 quebrado; eletroduto do mesmo ponto tambem quebrado (eletroduto de 2 polegadas)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir captor e eletroduto do ponto 01", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - captores", "escopo": "SE"}, {"id": "SE8200-2026-S39-150", "semana": 39, "data": "2026-09-30", "se": "SE-8200", "atividade": "Captor do ponto 02 coberto por galhos de arvore (mangueira) das proximidades", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar poda dos galhos proximos ao captor 02", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - vegetacao", "escopo": "SE"}, {"id": "SE8200-2026-S39-151", "semana": 39, "data": "2026-09-30", "se": "SE-8200", "atividade": "12 caixas de inspecao no solo (pertencentes a esta SE) precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE8200-2026-S39-152", "semana": 39, "data": "2026-09-30", "se": "SE-8200", "atividade": "4 descidas de escoamento sem caixa de inspecao de descida; eletroduto presente com 2 polegadas", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar e instalar caixas de inspecao de descida nas 4 descidas (eletroduto 2\")", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - caixa de inspecao", "escopo": "SE"}, {"id": "SE8224-2026-S39-153", "semana": 39, "data": "2026-09-30", "se": "SE-8224", "atividade": "Caixas de inspecao no solo (2) precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5334-2026-S39-154", "semana": 39, "data": "2026-10-01", "se": "SE-5334", "atividade": "Ponto de descida 05: isolador quebrado e mini captor tambem quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir isolador e mini captor do ponto 05", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - isoladores", "escopo": "SE"}, {"id": "SE5334-2026-S39-155", "semana": 39, "data": "2026-10-01", "se": "SE-5334", "atividade": "Captor das proximidades, entre as descidas 01 e 10, quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir captor", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - captores", "escopo": "SE"}, {"id": "SE5334-2026-S39-156", "semana": 39, "data": "2026-10-01", "se": "SE-5334", "atividade": "Caixas de inspecao no solo precisam de limpeza, areia/pedra brita no fundo e substituicao dos conectores oxidados", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Servico de limpeza + conectores novos", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5142-2026-S40-157", "semana": 40, "data": "2026-09-29", "se": "SE-5142", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza, edificacao, componentes, cabos/aterramento, iluminacao interna/externa/emergencia, exaustor/ventilacao e ar-condicionado sem anomalias (clima ambiente normal). Achados: necessidade de dedetizacao (aranhas/insetos); pequeno vazamento no dreno do ar-condicionado AC-211 (agua pingando no chao); tapetes isolantes - 4 unidades validas ate maio/2027 e 5 unidades fora da validade de ensaio. Kit de fardamento RF4, bastao de resgate, manometros/etiquetas de extintores e placas de identificacao das portas OK.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024686", "observacao": "", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE8224-2026-S40-158", "semana": 40, "data": "2026-09-28", "se": "SE-8224", "atividade": "Preventiva mensal executada (OM 4024696): varricao geral do ambiente (ate o limite da grade de protecao), remocao de teias de aranha/poeira/folhas/residuos, limpeza geral dos paineis eletricos. Subestacao em funcionamento com barramentos expostos (risco elevado de acidente grave) - por seguranca, apenas limpeza PARCIAL foi realizada; limpeza TOTAL requer parada programada.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achados abertos ver linhas de pendencia abaixo (suporte bastao de resgate, kit RF4, tapetes isolantes ausentes, iluminacao de emergencia, placa de identificacao TAG, exaustao/ar-condicionado ausentes, limpeza total pendente - parada programada)", "operacao": "Multiplas (fora do checklist 010-130 - limpeza parcial)", "escopo": "SE"}, {"id": "SEADM-2026-S40-159", "semana": 40, "data": "2026-09-28", "se": "SE-ADM", "atividade": "Inspecao de SPDA realizada: sistema de protecao compartilhado com o Predio ADM (ja inspecionado e documentado na OM 4024580)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Sem achados novos - mesmo sistema do Predio ADM, relatorio fixado na OM 4024580", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE6310-2026-S40-160", "semana": 40, "data": "2026-09-28", "se": "SE-6310", "atividade": "Inspecao de SPDA realizada: 2 descidas de escoamento, 2 caixas de inspecao de descida, 2 caixas de inspecao no solo (Gaiola de Faraday)", "categoria": "Preventiva - SPDA", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "Ver pendencias detalhadas nas linhas SPDA - SE-6310 abaixo", "operacao": "SPDA Semestral (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE450-2026-S40-161", "semana": 40, "data": "2026-10-02", "se": "SE-450", "atividade": "Inspecao termografica realizada em 15 pontos (PN-450-1 CCM1, PN-450-2 CCM2, PN-450-3 CCM3, PN-450-1 painel de distribuicao, TF-6315-1, PN-450-2 painel distribuicao balsa/flutuante, PN-450-3 painel distribuicao balsa/flutuante, PCC-450-1, PL-450-1, PL-450-2, QDT-450-1, QDT-450-3, TL-450-1, TL-450-2, TL-450-3) + ajuste do rele de protecao. Nao foi encontrado nenhum ponto de aquecimento ou problema eletrico pela termografia - temperatura normal, sem necessidade de recomendacao.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4023081", "observacao": "Execucao adiada de 29-30/09 (programado) para 02/10 (realizado)", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5131-2026-S40-162", "semana": 40, "data": "2026-10-01", "se": "SE-5131", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Limpeza geral OK (ambiente limpo/organizado, sem risco a operacao); voltimetros/amperimetros OK; portas externas/fechaduras/molas/barras funcionando perfeitamente; componentes limpos, firmes e em condicoes operacionais adequadas; cabos de aterramento/conexoes/portas/janelas em conformidade; iluminacao interna/externa/emergencia sem anomalias; exaustor/ventilacao OK; ar-condicionado OK; manometros e etiquetas dos extintores dentro da validade; placas de identificacao das portas em otimo estado; tapete isolante, kit fardamento RF4 e bastao de resgate OK (etiqueta de ensaio valida).", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4024719", "observacao": "Achados abertos ver linhas de pendencia abaixo (laje/morcego, dedetizacao)", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE8200-2026-S40-163", "semana": 40, "data": "2026-10-02", "se": "SE-8200", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4024861", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE8217-2026-S40-164", "semana": 40, "data": "2026-10-02", "se": "SE-8217", "atividade": "Checklist padrao de preventiva (13 etapas) realizado. Achados: tapete isolante sem laudo de ensaio de isolacao valido, item do kit de resgate/EPI com validade vencendo em 04/2026 (a confirmar qual item), extintores com recarga em atraso, rampa/corrimao de acesso a sala com desgaste.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "-", "om": "4024862", "observacao": "SE nova no controle diario - confirmar dados cadastrais com o Planejamento", "operacao": "Checklist 010-130 concluido", "escopo": "SE"}, {"id": "SE8217-2026-S40-165", "semana": 40, "data": "2026-09-29", "se": "SE-8217", "atividade": "Tapete isolante sem laudo de ensaio de isolacao valido", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Laudo de ensaio de isolacao atualizado ou tapete novo", "responsavel": "-", "om": "4024862", "observacao": "Achado no checklist de preventiva de 29/09", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE8217-2026-S40-166", "semana": 40, "data": "2026-09-29", "se": "SE-8217", "atividade": "Item do kit de resgate/EPI com validade vencendo em 04/2026", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confirmar com o tecnico qual item exatamente e providenciar reposicao antes do vencimento", "responsavel": "-", "om": "4024862", "observacao": "Achado no checklist de preventiva de 29/09", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE8217-2026-S40-167", "semana": 40, "data": "2026-09-29", "se": "SE-8217", "atividade": "Extintores de incendio com recarga em atraso", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Recarga dos extintores", "responsavel": "-", "om": "4024862", "observacao": "Achado no checklist de preventiva de 29/09", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE8217-2026-S40-168", "semana": 40, "data": "2026-09-29", "se": "SE-8217", "atividade": "Rampa/corrimao de acesso a sala com desgaste", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Nova OS de reparo civil", "responsavel": "-", "om": "4024862", "observacao": "Achado no checklist de preventiva de 29/09", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5142-2026-S40-169", "semana": 40, "data": "2026-09-29", "se": "SE-5142", "atividade": "Presenca de aranhas e insetos na SE-5142", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de dedetizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024686", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5142-2026-S40-170", "semana": 40, "data": "2026-09-29", "se": "SE-5142", "atividade": "Dreno do ar-condicionado AC-211 com agua pingando no chao (pequeno vazamento)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Verificar/reparar dreno do AC-211", "responsavel": "Janilson Bonilha Lima", "om": "4024686", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5142-2026-S40-171", "semana": 40, "data": "2026-09-29", "se": "SE-5142", "atividade": "5 dos 9 tapetes isolantes da SE-5142 estao fora da validade de ensaio (4 validos ate maio/2027)", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Executar ensaio dos tapetes isolantes vencidos", "responsavel": "Janilson Bonilha Lima", "om": "4024686", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-172", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 esta SEM suporte para o bastao de resgate (item ausente, EPI isolante NR-10)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Fabricar e instalar suporte para o bastao de resgate", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-173", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 esta SEM kit de fardamento RF4 (item ausente, EPI isolante NR-10)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Fornecer/providenciar kit de fardamento RF4", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-174", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 esta SEM tapetes isolantes de borracha (itens ausentes, nao e so falta de ensaio)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Providenciar com urgencia tapetes isolantes de borracha (EPI isolante NR-10)", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-175", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 sala de paineis SEM iluminacao de emergencia instalada", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar instalacao do sistema de iluminacao de emergencia", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-176", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 esta sem placa de identificacao com o TAG da subestacao", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placa de identificacao com TAG SE-8224", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-177", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "SE-8224 e local abrigado apenas com grades - NAO possui sistema de exaustao nem ar-condicionado", "categoria": "Reforma Eletrica", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS para implantar exaustao/climatizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE8224-2026-S40-178", "semana": 40, "data": "2026-09-30", "se": "SE-8224", "atividade": "Limpeza TOTAL da SE-8224 pendente - so foi possivel limpeza parcial por seguranca (barramentos expostos energizados)", "categoria": "Preventiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar parada programada para limpeza completa (barramentos, transformadores, chaves de fechamento, grade de protecao e canaletas)", "responsavel": "Janilson Bonilha Lima", "om": "4024696", "observacao": "Achado no relatorio de preventiva mensal de 30/09; cruzar com cronograma de paradas", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6310-2026-S40-179", "semana": 40, "data": "2026-10-01", "se": "SE-6310", "atividade": "Isolador na cobertura da subestacao quebrado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir isolador", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - isoladores", "escopo": "SE"}, {"id": "SE6310-2026-S40-180", "semana": 40, "data": "2026-10-01", "se": "SE-6310", "atividade": "Caixas de inspecao no solo com o interior cheio de terra", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Remover terra, limpeza e substituicao dos conectores", "responsavel": "Ramon Peixoto / Ademario Oliveira", "om": "4024815", "observacao": "", "operacao": "SPDA - conectores", "escopo": "SE"}, {"id": "SE5131-2026-S40-181", "semana": 40, "data": "2026-10-02", "se": "SE-5131", "atividade": "Laje da sala de paineis com manchas no teto e odor intenso de fezes de morcego (frestas na laje)", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS a equipe civil para fechamento das frestas na laje", "responsavel": "Janilson Bonilha Lima", "om": "4024719", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5131-2026-S40-182", "semana": 40, "data": "2026-10-02", "se": "SE-5131", "atividade": "Presenca de aranhas e insetos na SE-5131", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de dedetizacao", "responsavel": "Janilson Bonilha Lima", "om": "4024719", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SECTR-2026-S41-183", "semana": 41, "data": "2026-10-05", "se": "SE-CTR", "atividade": "Manutencao preventiva mensal realizada: limpeza completa dos paineis eletricos (remocao de poeira, teias de aranha e residuos); demais itens em conformidade", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima (Norte Construtora)", "om": "4024905", "observacao": "Relatorio de campo (Norte, 05/10/2026): identificada palha de coqueiro proxima aos cabos de alimentacao e chaves - risco de curto-circuito, recomendada remocao imediata (nova OS a abrir). Verificado 19 luminarias e 10 refletores de iluminacao viaria queimados, necessitando substituicao com andaime/plataforma elevatoria (nova OS a abrir).", "operacao": "Checklist 010-130 (preventiva mensal) + limpeza de paineis", "escopo": "SE"}, {"id": "SE6000-2026-S41-184", "semana": 41, "data": "2026-10-05 a 06", "se": "SE-6000", "atividade": "Termografia painel a painel realizada em 23 pontos (PN-6000-01 CCM, PN-6000-02/004/005/008, PL-6000-006, PN-6000-032/033, PN-QD-6000-034, PCC-6000-001, CB-6000-01A/01B, PN-PS-6000-01A/01B, BT-6000-01A/01B, TT-6000-01A, TF-6000-01B/002/003/004, CH-6000-001A/001B). Aberturas dos compartimentos frontais, traseiros e calhas de cabos de todos os paineis e transformadores realizadas. Achado: 1 ponto de atencao no TF-6000-06 - ver linha de pendencia abaixo.", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ademario Oliveira / Ramon Peixoto", "om": "4025124", "observacao": "Ver pendencia detalhada na linha SE-6000 (TF-6000-06) abaixo", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE2111-2026-S41-185", "semana": 41, "data": "2026-10-05", "se": "SE-2111", "atividade": "BT-2111-02 (Bateria 2): nivel completado - banco de 60 celulas, todas a 50% de capacidade de eletrolito (fora de estado critico); 17 celulas remanescentes concluidas em 05/10", "categoria": "Corretiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025075", "observacao": "Relatorio de campo (Norte, 05/10/2026): nivel de eletrolito completado nas celulas; 17 celulas que faltavam (sem agua suficiente na primeira passagem) concluidas no mesmo dia. Nota: TAG do banco de baterias ausente fisicamente - hoje escrito a caneta na parede, registrado fotograficamente pela Norte.", "operacao": "Completar nivel de eletrolito (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SEADM-2026-S41-186", "semana": 41, "data": "2026-10-06", "se": "SE-ADM", "atividade": "Checklist padrao de preventiva (13 etapas) realizado - demais itens em conformidade", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4024929", "observacao": "Relatorio de campo (Norte): disjuntores principais do quadro de baixa tensao com desgaste visivel nos contatos - recomendada nova OS para reparo/substituicao. Gaveta de disjuntor com rosca em mal estado, tambem recomendada nova OS para reparo/substituicao. Demais itens do checklist (iluminacao, ventilacao/exaustao, ar condicionado, extintores) aparentam conformidade. Observacao: letra manuscrita de dificil leitura em varios trechos deste relatorio - vale conferir o original antes de considerar definitivo.", "operacao": "Checklist 010-130 (preventiva mensal)", "escopo": "SE"}, {"id": "SE6310-2026-S41-187", "semana": 41, "data": "2026-10-07", "se": "SE-6310", "atividade": "Inspecao preventiva mensal realizada. Limpeza do ambiente, paredes, piso, paineis e transformadores OK. Edificacao em boas condicoes (pintura externa desgastada - ver pendencia). Canaletas em bom estado, tampas fixadas corretamente. Cabos e conexoes de aterramento em bom estado e fixos. Iluminacao do local funcional (testada). Ar-condicionado em bom estado e em pleno funcionamento. Etiqueta do extintor em bom estado, visivel, com inspecao do mes corrente em dia. Achados: ver linhas de pendencia abaixo (pintura externa, placas de identificacao de alta tensao ausentes, porta principal com fechadura quebrada, ventiladores SS-53001A/SS-53001B em curto).", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Janilson Bonilha Lima", "om": "4025062", "observacao": "Achados abertos ver linhas de pendencia abaixo", "operacao": "Checklist mensal concluido", "escopo": "SE"}, {"id": "SE450-2026-S41-188", "semana": 41, "data": "2026-10-07", "se": "SE-450", "atividade": "Checklist padrao de preventiva (13 etapas) realizado - demais itens em conformidade, sem anomalias relevantes", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025026", "observacao": "Relatorio de campo (Norte, 07/10/2026): recomendada nova OS com camera para verificar odor de fumaca no telhado da sala de protecao/maquinas e transformador; recomendada instalacao de iluminacao de emergencia; sala da subestacao com temperatura elevada (ventilacao/exaustao funcionando); tapetes/equipamento isolante sem registro de ensaio atualizado (prazo de resgate valido ate abril/2027). Demais itens verificados em conformidade. Observacao: letra manuscrita de dificil leitura em alguns trechos - vale conferir o original.", "operacao": "Checklist 010-130 (preventiva mensal)", "escopo": "SE"}, {"id": "SE6000-2026-S41-189", "semana": 41, "data": "2026-10-08", "se": "SE-6000", "atividade": "Checklist padrao de preventiva (13 etapas) realizado - maioria dos itens OK", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025027", "observacao": "Relatorio de campo (Norte, 09/10/2026, modelo checklist por operacao): item 110 - tapetes de isolacao sem etiquetas de certificacao, necessario providenciar certificacao. Demais itens do checklist 010-130 marcados OK.", "operacao": "Checklist 010-130 (preventiva mensal, modelo checklist por operacao)", "escopo": "SE"}, {"id": "SE5334-2026-S41-190", "semana": 41, "data": "2026-10-09", "se": "SE-5334", "atividade": "Inspecao termografica realizada: 15 pontos (PN-5334-1 CCM, CB-5334-1A/1B, BT-5334-1A/1B, PN-5334-02/03/04, PL-5334-01, PCC-5334-01/02, PN-01/02/03/04) - nenhuma anomalia termica encontrada", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Ademario Oliveira / Ramon Peixoto", "om": "4025130", "observacao": "Relatorio de campo (Norte, 09/10/2026): temperatura normal em todos os pontos, sem recomendacao. Ajuste de rele no CCM (tambem previsto nesta OM) nao foi mencionado neste relatorio - ver registro separado SE5334-2026-S41-208.", "operacao": "Termografia realizada (fora do checklist 010-130)", "escopo": "SE"}, {"id": "SE5132-2026-S41-191", "semana": 41, "data": "2026-10-09", "se": "SE-5132", "atividade": "Checklist padrao de preventiva (13 etapas) realizado - sem anormalidades identificadas", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025028", "observacao": "Relatorio de campo (Norte, 09/10/2026): todos os itens conforme OM e PT, sem anormalidades. Necessaria limpeza no piso da sala de paineis de comando (realizada). IMPORTANTE: relatorio registra que a SE-5132 encontra-se fora de operacao.", "operacao": "Checklist 010-130 (preventiva mensal) + limpeza da sala de paineis", "escopo": "SE"}, {"id": "SE2111-2026-S41-192", "semana": 41, "data": "2026-10-09", "se": "SE-2111", "atividade": "Checklist padrao de preventiva (13 etapas) realizado - limpeza e verificacao em salas de CCM, SDCD e pressurizacao de ar", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025134", "observacao": "Relatorio de campo (Norte, 09/10/2026): limpeza nas salas de paineis de CCM, SDCD e pressurizacao de ar; substituidas 3 lampadas fluorescentes ED1S queimadas na sala de SDCD; limpeza de filtros e correia da sala de pressurizacao (muito suja). Pendente: 1 luminaria queimada na sala de CCM e 1 luminaria fluorescente fora do local - ambas necessitam apoio de andaime para substituicao/instalacao (nao executado nesta visita).", "operacao": "Checklist 010-130 (preventiva mensal) + limpeza e troca de lampadas", "escopo": "SE"}, {"id": "SE2111-2026-S41-193", "semana": 41, "data": "2026-10-09", "se": "SE-2111", "atividade": "Painel PN-2111-06: substituir/reparar disjuntor programado", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Nova data da Norte Construtora", "responsavel": "-", "om": "4025092", "observacao": "Prorrogada pela Norte Construtora em 13/10/2026 - nova data de execucao a definir.", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE2111-2026-S41-194", "semana": 41, "data": "2026-10-09", "se": "SE-2111", "atividade": "Motor M-VE-2111-01B: avaliar/corrigir motor eletrico e dumper programado", "categoria": "Corretiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025093", "observacao": "Frente eletrica ELETCOT1 (17.6h) + mecanica MECACOT1 (8.8h, fora do escopo eletrico)", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6000-2026-S41-195", "semana": 41, "data": "2026-10-05 a 06", "se": "SE-6000", "atividade": "Ponto de atencao termografico no TF-6000-06 (secundario X1): correntes medidas - primario H1=32.4A, H2=23.6A, H3=22.4A; secundario X0=5.6A, X1=60.1A, X2=58.1A, X3=39.1A. Temperaturas dos pontos primarios/secundarios registradas em fotografia. Equipamento recebe alimentacao 440V do painel PN-6000-001 (CCM coluna 11, gaveta 03).", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Acompanhar e reavaliar o ponto quente no secundario X1 do TF-6000-06 na proxima campanha de termografia (sem acao corretiva definida neste relatorio)", "responsavel": "Ademario Oliveira / Ramon Peixoto", "om": "4025124", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6310-2026-S41-196", "semana": 41, "data": "2026-10-07", "se": "SE-6310", "atividade": "Pintura externa da edificacao desgastada (estado fisico preservado)", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Solicitar nova OS de pintura externa da edificacao", "responsavel": "Janilson Bonilha Lima", "om": "4025062", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6310-2026-S41-197", "semana": 41, "data": "2026-10-07", "se": "SE-6310", "atividade": "Nao existem placas de identificacao de alta tensao na SE-6310 (conforme registro fotografico)", "categoria": "Compras", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Confeccionar e instalar placas de identificacao/advertencia de alta tensao", "responsavel": "Janilson Bonilha Lima", "om": "4025062", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6310-2026-S41-198", "semana": 41, "data": "2026-10-07", "se": "SE-6310", "atividade": "Porta principal com fechadura quebrada (conforme registro fotografico)", "categoria": "Reforma Civil", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Reparar/substituir fechadura da porta principal", "responsavel": "Janilson Bonilha Lima", "om": "4025062", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE6310-2026-S41-199", "semana": 41, "data": "2026-10-07", "se": "SE-6310", "atividade": "Ventiladores dos paineis SS-53001A e SS-53001B identificados em curto-circuito; respectivos disjuntores desligados no painel de distribuicao PN-6310-02 (conforme registro fotografico)", "categoria": "Corretiva", "status": "Aberto", "status_grupo": "Aberto", "aguardando": "Substituir os ventiladores SS-53001A e SS-53001B e reavaliar o religamento dos disjuntores no PN-6310-02", "responsavel": "Janilson Bonilha Lima", "om": "4025062", "observacao": "", "operacao": "N/A (fora do checklist)", "escopo": "SE"}, {"id": "SE5334-2026-S42-200", "semana": 42, "data": "2026-10-13", "se": "SE-5334", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025139", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE8200-2026-S42-201", "semana": 42, "data": "2026-10-13", "se": "SE-8200", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4024861", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE2000-2026-S42-202", "semana": 42, "data": "2026-10-14", "se": "SE-2000", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025133", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE5100-2026-S42-203", "semana": 42, "data": "2026-10-14", "se": "SE-5100", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025137", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE4B-2026-S42-204", "semana": 42, "data": "2026-10-15", "se": "SE-4B", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025136", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE5143-2026-S42-205", "semana": 42, "data": "2026-10-15", "se": "SE-5143", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025140", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE410-2026-S42-206", "semana": 42, "data": "2026-10-16", "se": "SE-410", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025135", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE710-2026-S42-207", "semana": 42, "data": "2026-10-16", "se": "SE-710", "atividade": "Checklist padrao de preventiva (13 etapas) programado", "categoria": "Preventiva", "status": "Programado", "status_grupo": "Programado", "aguardando": "", "responsavel": "-", "om": "4025141", "observacao": "", "operacao": "N/A (ainda nao realizado)", "escopo": "SE"}, {"id": "SE5334-2026-S41-208", "semana": 41, "data": "2026-10-08 a 09", "se": "SE-5334", "atividade": "Ajuste do rele no CCM realizado - nenhuma anormalidade encontrada", "categoria": "Preventiva", "status": "Concluido", "status_grupo": "Concluído", "aguardando": "", "responsavel": "Equipe Norte Construtora", "om": "4025130", "observacao": "Confirmado por Iderlan Freitas (REAM) em 14/10/2026: ajuste do rele no CCM concluido, sem anormalidades. Ver tambem a termografia da mesma OM, ja concluida em SE5334-2026-S41-190.", "operacao": "N/A (fora do checklist 010-130)", "escopo": "SE"}], "cadastro": [{"seq": 1, "se": "SE-2000", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 2, "se": "SE-2111", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 3, "se": "SE-410", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 4, "se": "SE-450", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 5, "se": "SE-4B", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 6, "se": "SE-5100", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 7, "se": "SE-5121", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 8, "se": "SE-5131", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 9, "se": "SE-5132", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 10, "se": "SE-5142", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 11, "se": "SE-5143", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 12, "se": "SE-5334", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 13, "se": "SE-6000", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 14, "se": "SE-6310", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 15, "se": "SE-710", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 16, "se": "SE-8200", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 17, "se": "SE-8217", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 18, "se": "SE-8224", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 19, "se": "SE-8244", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 20, "se": "SE-ADM", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 21, "se": "SE-CTR", "status_cadastro": "Confirmada", "evidencia": "Aparece nos registros semanais 37–41/2026", "observacao": "Cadastro operacional considerado"}, {"seq": 22, "se": "SE-A CADASTRAR 01", "status_cadastro": "A cadastrar", "evidencia": "Não identificada nominalmente no arquivo atual", "observacao": "Substituir pelo nome real quando confirmado"}, {"seq": 23, "se": "SE-A CADASTRAR 02", "status_cadastro": "A cadastrar", "evidencia": "Não identificada nominalmente no arquivo atual", "observacao": "Substituir pelo nome real quando confirmado"}]}</script>
+<script src="d3.min.js"></script>
+<script>
+
+  function createDash(datasets) {
+    var calcs = {};
+    var listeners = [];
+    var params = {};
+    function compute(id) {
+      var c = calcs[id];
+      if (!c) return { status: "error", data: null };
+      var inputs = c.inputs.map(function (name) {
+        var d = datasets[name];
+        if (!d) throw new Error("dataset ausente: " + name);
+        return d;
+      });
+      try {
+        return { status: "ok", data: c.fn.apply(null, inputs), refreshing: false, meta: {} };
+      } catch (e) {
+        console.error("Erro ao calcular \"" + id + "\":", e);
+        return { status: "error", data: null };
+      }
+    }
+    return {
+      calc: function (id, def) { calcs[id] = def; },
+      data: function (id) {
+        if (datasets[id]) return { status: "ok", data: datasets[id], refreshing: false, meta: {} };
+        if (calcs[id]) return compute(id);
+        return { status: "error", data: null };
+      },
+      onData: function (fn) { listeners.push(fn); },
+      params: function () { return params; },
+      setParams: function (p) { Object.assign(params, p); listeners.forEach(function (fn) { fn(); }); },
+      setLink: function (name) { if (history.replaceState) history.replaceState(null, "", "#" + name); },
+      colors: ["#2f7ed8", "#e5484d", "#8b5cf6", "#f0a93d", "#1f9d6c", "#9aa0ab", "#0d9aa1", "#2056a8"]
+    };
+  }
+
+  function initApp() {
+    "use strict";
+
+    (function () {
+      "use strict";
+
+      var fmtInt = d3.format(",");
+      var fmtPct = d3.format(".0%");
+      var parseDay = d3.utcParse("%Y-%m-%d");
+      var fmtDay = d3.utcFormat("%d/%m/%y");
+
+      var STATUS_CHIP = {
+        "Concluído": "st-ok",
+        "Programado": "st-muted",
+        "Aberto": "st-bad",
+        "Aguardando Material": "st-warn",
+        "Aguardando Resumo Técnico": "st-warn",
+        "Compartilhado": "st-muted",
+        "Cancelada/Duplicada": "st-muted"
+      };
+
+      function statusChip(status) {
+        var cls = STATUS_CHIP[status] || "st-muted";
+        var span = document.createElement("span");
+        span.className = "rd-status-chip " + cls;
+        span.textContent = status || "—";
+        return span;
+      }
+
+      function fmtDate(iso) {
+        if (!iso) return "—";
+        var d = parseDay(iso);
+        return d ? fmtDay(d) : iso;
+      }
+
+      // Mesma cor para o mesmo status em todos os gráficos e cards (Aberto, Aguardando,
+      // Programado e Concluído usam as cores dos cards kpi-* do CSS). "Outros" cobre os
+      // dois status que a base também registra mas que não são itens de trabalho em
+      // aberto: Compartilhado (achado também lançado em outra SE) e Cancelada/Duplicada.
+      var STATUS_COLOR = {
+        "Concluído": "#1f9d6c",
+        "Programado": "#8b5cf6",
+        "Aberto": "#e5484d",
+        "Aguardando Material": "#f0a93d",
+        "Aguardando Resumo Técnico": "#f0a93d",
+        "Compartilhado": "#9aa0ab",
+        "Cancelada/Duplicada": "#9aa0ab"
+      };
+
+      // Conta um conjunto de registros nos mesmos 5 grupos em toda a página, para que
+      // os indicadores gerais, o detalhe por SE, a evolução semanal e a carga por
+      // categoria sempre somem exatamente o total de registros do grupo (nenhum
+      // registro "desaparece" de um gráfico para outro).
+      function statusBuckets(rows) {
+        var by = {};
+        rows.forEach(function (r) { by[r.status_grupo] = (by[r.status_grupo] || 0) + 1; });
+        return {
+          total: rows.length,
+          concluidos: by["Concluído"] || 0,
+          programados: by["Programado"] || 0,
+          abertos: by["Aberto"] || 0,
+          aguardandoMaterial: by["Aguardando Material"] || 0,
+          aguardandoResumo: by["Aguardando Resumo Técnico"] || 0,
+          aguardando: (by["Aguardando Material"] || 0) + (by["Aguardando Resumo Técnico"] || 0),
+          compartilhado: by["Compartilhado"] || 0,
+          cancelada: by["Cancelada/Duplicada"] || 0,
+          outros: (by["Compartilhado"] || 0) + (by["Cancelada/Duplicada"] || 0)
+        };
+      }
+
+      // ---------- derived data ----------
+      // Todos os cálculos abaixo somam ou agrupam campos que já existem em base_manutencao.json
+      // e cadastro_ses.json (status_grupo, se, categoria, semana, status_cadastro) — nenhum
+      // valor, meta ou indicador é inventado.
+
+      dash.calc("kpis", {
+        inputs: ["base", "cadastro"],
+        title: "Indicadores gerais",
+        description: "Conta os registros da base de manutenção por status e o cadastro confirmado das 23 SEs.",
+        fn: function (base, cadastro) {
+          var b = statusBuckets(base);
+          return {
+            total: b.total,
+            concluidos: b.concluidos,
+            programados: b.programados,
+            abertos: b.abertos,
+            aguardandoMaterial: b.aguardandoMaterial,
+            aguardandoResumo: b.aguardandoResumo,
+            compartilhado: b.compartilhado,
+            cancelada: b.cancelada,
+            outros: b.outros,
+            pctConcluido: b.total ? b.concluidos / b.total : 0,
+            sesCadastradas: cadastro.filter(function (c) { return c.status_cadastro === "Confirmada"; }).length,
+            sesAcadastrar: cadastro.filter(function (c) { return c.status_cadastro !== "Confirmada"; }).length,
+            sesTotal: cadastro.length,
+            sesComRegistro: new Set(base.map(function (r) { return r.se; })).size
+          };
+        }
+      });
+
+      // Reaproveitada tanto pelo calc "por_se" (todas as semanas) quanto pela aba
+      // Mapa de SEs quando o filtro de semana está ativo (recorta "base" antes de chamar).
+      function computePorSe(base, cadastro) {
+        return cadastro.map(function (c) {
+          var rows = base.filter(function (r) { return r.se === c.se; });
+          var b = statusBuckets(rows);
+          var pendentes = b.abertos + b.aguardando;
+          var nivel;
+          if (c.status_cadastro !== "Confirmada") nivel = "cadastro";
+          else if (pendentes >= 10) nivel = "prioridade";
+          else if (pendentes > 0) nivel = "atencao";
+          else nivel = "controlada";
+          return {
+            se: c.se, seq: c.seq, statusCadastro: c.status_cadastro,
+            registros: rows.length, concluidos: b.concluidos, programados: b.programados,
+            abertos: b.abertos, aguardando: b.aguardando, outros: b.outros,
+            pendentes: pendentes, nivel: nivel
+          };
+        });
+      }
+
+      dash.calc("por_se", {
+        inputs: ["base", "cadastro"],
+        title: "Registros por SE",
+        description: "Cruza o cadastro das 23 SEs com a contagem de registros da base, por status, para cada posição.",
+        fn: function (base, cadastro) {
+          return computePorSe(base, cadastro);
+        }
+      });
+
+      dash.calc("semanal", {
+        inputs: ["base"],
+        title: "Evolução por semana",
+        description: "Agrupa a base de manutenção por semana e conta os registros por status em cada uma.",
+        fn: function (base) {
+          var semanas = Array.from(new Set(base.map(function (r) { return r.semana; }))).sort(function (a, b) { return a - b; });
+          return semanas.map(function (semana) {
+            var rows = base.filter(function (r) { return r.semana === semana; });
+            var b = statusBuckets(rows);
+            return {
+              semana: semana, registros: b.total, concluidos: b.concluidos, programados: b.programados,
+              abertos: b.abertos, aguardando: b.aguardando, outros: b.outros
+            };
+          });
+        }
+      });
+
+      dash.calc("por_categoria", {
+        inputs: ["base"],
+        title: "Registros por categoria",
+        description: "Agrupa a base de manutenção pelo campo Categoria e conta os registros por status em cada uma, ordenado do maior para o menor volume.",
+        fn: function (base) {
+          var categorias = Array.from(new Set(base.map(function (r) { return r.categoria; })));
+          return categorias.map(function (categoria) {
+            var rows = base.filter(function (r) { return r.categoria === categoria; });
+            var b = statusBuckets(rows);
+            return {
+              categoria: categoria, registros: b.total, concluidos: b.concluidos, programados: b.programados,
+              abertos: b.abertos, aguardando: b.aguardando, outros: b.outros
+            };
+          }).sort(function (a, b) { return b.registros - a.registros; });
+        }
+      });
+
+      // ---------- tabs ----------
+
+      var PAGES = ["geral", "mapa", "detalhe", "pendencias"];
+      function showPage(name) {
+        PAGES.forEach(function (p) {
+          document.getElementById("rd-page-" + p).hidden = p !== name;
+          document.getElementById("rd-tabbtn-" + p).setAttribute("aria-selected", String(p === name));
+        });
+        dash.setLink(name);
+        window.requestAnimationFrame(renderAll);
+      }
+      PAGES.forEach(function (p) {
+        document.getElementById("rd-tabbtn-" + p).addEventListener("click", function () { showPage(p); });
+      });
+
+      function openDetail(se) {
+        dash.setParams({ se: se });
+        document.getElementById("rd-se-select").value = se;
+        showPage("detalhe");
+      }
+
+      // ---------- KPI fill ----------
+
+      function fillKpis() {
+        var res = dash.data("kpis");
+        document.querySelectorAll('[data-source="kpis"] [data-field]').forEach(function (el) {
+          if (el.id === "rd-kpi-footnote") return; // tratado à parte, abaixo
+          el.classList.remove("dash-skeleton");
+          if (res.status !== "ok") { el.textContent = res.status === "loading" ? "" : "—"; return; }
+          var field = el.dataset.field;
+          var v = res.data[field];
+          if (el.dataset.note === "ses") {
+            el.textContent = v + " de " + fmtInt(res.data.sesTotal) + " SEs com lançamento";
+          } else if (el.dataset.note === "pct") {
+            el.textContent = fmtPct(v) + " do total";
+          } else if (el.dataset.note === "resumo") {
+            el.textContent = fmtInt(v) + " aguardando resumo técnico";
+          } else if (el.dataset.note === "acadastrar") {
+            el.textContent = v > 0 ? (fmtInt(v) + " a cadastrar de " + fmtInt(res.data.sesTotal) + " posições") : ("de " + fmtInt(res.data.sesTotal) + " posições");
+          } else if (field === "pctConcluido") {
+            el.textContent = fmtPct(v);
+          } else {
+            el.textContent = fmtInt(v);
+          }
+        });
+
+        var footnote = document.getElementById("rd-kpi-footnote");
+        if (res.status === "ok") {
+          var parts = [];
+          if (res.data.compartilhado > 0) parts.push(fmtInt(res.data.compartilhado) + " compartilhado" + (res.data.compartilhado > 1 ? "s" : "") + " entre SEs");
+          if (res.data.cancelada > 0) parts.push(fmtInt(res.data.cancelada) + " cancelado/duplicado" + (res.data.cancelada > 1 ? "s" : ""));
+          footnote.textContent = parts.length ? ("A base também registra " + parts.join(" e ") + ", não contabilizados nos indicadores acima.") : "";
+        } else {
+          footnote.textContent = "";
+        }
+
+        var takeaway = document.getElementById("rd-takeaway");
+        var por_se = dash.data("por_se");
+        takeaway.classList.remove("dash-skeleton");
+        if (res.status === "ok" && por_se.status === "ok") {
+          var top3 = por_se.data.slice().sort(function (a, b) { return b.pendentes - a.pendentes; }).slice(0, 3)
+            .filter(function (s) { return s.pendentes > 0; }).map(function (s) { return s.se; }).join(", ");
+          takeaway.textContent = fmtInt(res.data.total) + " registros · " + fmtInt(res.data.abertos) + " abertos, " +
+            fmtInt(res.data.programados) + " programados, " + fmtInt(res.data.concluidos) + " concluídos" +
+            (top3 ? " — maior backlog em " + top3 + "." : ".");
+        } else if (res.status === "error" || por_se.status === "error") {
+          takeaway.textContent = "";
+        }
+
+        fillScopeAndNotes();
+        fillSobreBase();
+      }
+
+      // Textos que citam o total de registros ou o intervalo de semanas cobertas —
+      // calculados a partir dos dados, para nunca ficarem desatualizados quando uma
+      // semana nova entrar (em vez de um texto fixo revisado manualmente).
+      function fillScopeAndNotes() {
+        var kpisRes = dash.data("kpis");
+        var semanalRes = dash.data("semanal");
+        if (kpisRes.status !== "ok" || semanalRes.status !== "ok") return;
+        var semanas = semanalRes.data.map(function (d) { return d.semana; });
+        var rangeLower = semanas.length
+          ? (semanas.length === 1 ? "semana " + semanas[0] : "semanas " + semanas[0] + "–" + semanas[semanas.length - 1])
+          : "semanas —";
+        var rangeUpper = semanas.length
+          ? (semanas.length === 1 ? "Semana " + semanas[0] : "Semanas " + semanas[0] + " a " + semanas[semanas.length - 1])
+          : "Semanas —";
+
+        var badge = document.getElementById("rd-scope-badge");
+        if (badge) badge.textContent = fmtInt(kpisRes.data.sesTotal) + " posições de SE · " + rangeLower + "/2026";
+
+        var resumoNote = document.getElementById("rd-resumo-note");
+        if (resumoNote) resumoNote.textContent = "Evolução semanal dos lançamentos e as SEs com maior backlog, lado a lado. " + rangeUpper + "/2026.";
+
+        var categoriaNote = document.getElementById("rd-categoria-note");
+        if (categoriaNote) categoriaNote.textContent = "Todos os " + fmtInt(kpisRes.data.total) + " registros, agrupados por categoria e status.";
+      }
+
+      // ---------- "Sobre esta base" ----------
+
+      function fillSobreBase() {
+        var el = document.getElementById("rd-sobre-base");
+        if (!el) return;
+        var baseRes = dash.data("base");
+        var cadRes = dash.data("cadastro");
+        if (baseRes.status !== "ok" || cadRes.status !== "ok") return;
+        el.classList.remove("dash-skeleton");
+        var datas = baseRes.data.map(function (r) { return r.data; }).filter(Boolean).sort();
+        var semanas = Array.from(new Set(baseRes.data.map(function (r) { return r.semana; }))).sort(function (a, b) { return a - b; });
+        var confirmadas = cadRes.data.filter(function (c) { return c.status_cadastro === "Confirmada"; }).length;
+        var pendentes = cadRes.data.filter(function (c) { return c.status_cadastro !== "Confirmada"; });
+        var pendentesNomes = pendentes.map(function (c) { return c.se; }).join(", ");
+        el.textContent = "Fonte: controle diário de manutenção elétrica das subestações (PIE-REAM-EL-001). " +
+          "Cobre as semanas " + semanas[0] + " a " + semanas[semanas.length - 1] + "/2026, registros de " +
+          fmtDate(datas[0]) + " a " + fmtDate(datas[datas.length - 1]) + ". " +
+          fmtInt(confirmadas) + " de " + fmtInt(cadRes.data.length) + " posições do cadastro estão confirmadas" +
+          (pendentes.length ? " — " + pendentesNomes + " seguem sem nome oficial, aguardando confirmação." : ".") +
+          " A base não traz data prevista de conclusão nem meta (SLA) por item; os status refletem apenas o que foi lançado em campo.";
+      }
+
+      // Série padrão dos gráficos empilhados por status (evolução semanal e carga por
+      // categoria). A ordem define a ordem de empilhamento, de baixo para cima.
+      var STACK_SERIES = [
+        { key: "concluidos", label: "Concluído", color: STATUS_COLOR["Concluído"] },
+        { key: "programados", label: "Programado", color: STATUS_COLOR["Programado"] },
+        { key: "abertos", label: "Aberto", color: STATUS_COLOR["Aberto"] },
+        { key: "aguardando", label: "Aguardando material/resumo", color: STATUS_COLOR["Aguardando Material"] },
+        { key: "outros", label: "Outros (compartilhado/cancelado)", color: STATUS_COLOR["Compartilhado"] }
+      ];
+
+      function fillLegend(el, series) {
+        el.innerHTML = "";
+        series.forEach(function (s) {
+          var item = document.createElement("span");
+          item.className = "rd-legend-item";
+          var sw = document.createElement("span");
+          sw.className = "rd-legend-swatch";
+          sw.style.background = s.color;
+          item.appendChild(sw);
+          item.appendChild(document.createTextNode(s.label));
+          el.appendChild(item);
+        });
+      }
+
+      // ---------- weekly chart ----------
+
+      function drawSemanal() {
+        var box = document.getElementById("rd-semanal-chart");
+        var res = dash.data("semanal");
+        box.setAttribute("data-dash-source-state", res.status === "ok" ? (res.refreshing ? "refreshing" : "") : res.status);
+        var legend = document.getElementById("rd-semanal-legend");
+        if (res.status !== "ok") {
+          box.innerHTML = res.status === "loading"
+            ? '<div class="dash-skeleton" style="height:220px"></div>'
+            : '<div style="display:flex;align-items:center;justify-content:center;height:220px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)">Falha ao carregar</div>';
+          legend.innerHTML = "";
+          return;
+        }
+        var data = res.data;
+        var series = STACK_SERIES.filter(function (s) { return d3.sum(data, function (d) { return d[s.key]; }) > 0; });
+        fillLegend(legend, series);
+
+        var width = Math.max(box.clientWidth, 280);
+        var height = 240;
+        var margin = { top: 10, right: 12, bottom: 28, left: 34 };
+        var innerW = width - margin.left - margin.right;
+        var innerH = height - margin.top - margin.bottom;
+
+        box.innerHTML = "";
+        var svg = d3.select(box).append("svg").attr("viewBox", "0 0 " + width + " " + height).attr("role", "img")
+          .attr("aria-label", "Registros por semana, por status");
+        var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scaleBand().domain(data.map(function (d) { return d.semana; })).range([0, innerW]).padding(0.3);
+        var maxY = d3.max(data, function (d) { return d.registros; }) || 1;
+        var y = d3.scaleLinear().domain([0, maxY * 1.15]).range([innerH, 0]);
+
+        g.append("g").attr("class", "rd-gridlines")
+          .selectAll("line").data(y.ticks(4)).join("line")
+          .attr("x1", 0).attr("x2", innerW).attr("y1", function (d) { return y(d); }).attr("y2", function (d) { return y(d); })
+          .attr("stroke", "var(--cds-chart-grid)").attr("stroke-width", 1);
+
+        g.append("g").attr("transform", "translate(0," + innerH + ")")
+          .call(d3.axisBottom(x).tickFormat(function (d) { return "S" + d; }).tickSize(0))
+          .attr("font-size", null).attr("font-family", null)
+          .call(function (axis) { axis.select(".domain").attr("stroke", "var(--cds-chart-axis)"); })
+          .selectAll("text").attr("fill", "var(--color-fg-muted)").attr("font-size", "var(--cds-font-size-caption)").attr("dy", "0.9em");
+
+        g.append("g").call(d3.axisLeft(y).ticks(4).tickSize(0))
+          .attr("font-size", null).attr("font-family", null)
+          .call(function (axis) { axis.select(".domain").remove(); })
+          .selectAll("text").attr("fill", "var(--color-fg-muted)").attr("font-size", "var(--cds-font-size-caption)");
+
+        var tooltip = document.getElementById("rd-tooltip");
+        var wrap = document.querySelector(".ream-dash");
+        var stacked = d3.stack().keys(series.map(function (s) { return s.key; }))(data);
+
+        stacked.forEach(function (layer, i) {
+          var s = series[i];
+          g.selectAll(".rd-seg-sem-" + i).data(layer).join("rect")
+            .attr("x", function (d) { return x(d.data.semana); }).attr("width", x.bandwidth())
+            .attr("y", function (d) { return y(d[1]); })
+            .attr("height", function (d) { return Math.max(0, y(d[0]) - y(d[1])); })
+            .attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 1)
+            .on("mousemove", function (event, d) {
+              var w = wrap.getBoundingClientRect();
+              tooltip.innerHTML = '<div class="rd-tt-title">Semana ' + d.data.semana + ' · ' + fmtInt(d.data.registros) + ' registros</div>' +
+                series.map(function (ss) {
+                  return '<div class="rd-tt-row"><span class="rd-legend-swatch" style="background:' + ss.color + '"></span>' + ss.label + ": " + fmtInt(d.data[ss.key]) + "</div>";
+                }).join("");
+              tooltip.style.left = (event.clientX - w.left + 12) + "px";
+              tooltip.style.top = (event.clientY - w.top - 12) + "px";
+              tooltip.style.opacity = 1;
+            })
+            .on("mouseleave", function () { tooltip.style.opacity = 0; });
+        });
+      }
+
+      // ---------- categoria chart ----------
+
+      function drawCategoria() {
+        var box = document.getElementById("rd-categoria-chart");
+        var res = dash.data("por_categoria");
+        box.setAttribute("data-dash-source-state", res.status === "ok" ? (res.refreshing ? "refreshing" : "") : res.status);
+        var legend = document.getElementById("rd-categoria-legend");
+        if (res.status !== "ok") {
+          box.innerHTML = res.status === "loading"
+            ? '<div class="dash-skeleton" style="height:220px"></div>'
+            : '<div style="display:flex;align-items:center;justify-content:center;height:220px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)">Falha ao carregar</div>';
+          legend.innerHTML = "";
+          return;
+        }
+        var data = res.data;
+        var series = STACK_SERIES.filter(function (s) { return d3.sum(data, function (d) { return d[s.key]; }) > 0; });
+        fillLegend(legend, series);
+
+        var width = Math.max(box.clientWidth, 280);
+        var rowH = 34;
+        var margin = { top: 6, right: 44, bottom: 10, left: 132 };
+        var innerW = width - margin.left - margin.right;
+        var height = data.length * rowH + margin.top + margin.bottom;
+
+        box.innerHTML = "";
+        var svg = d3.select(box).append("svg").attr("viewBox", "0 0 " + width + " " + height).attr("role", "img")
+          .attr("aria-label", "Registros por categoria, por status");
+        var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var y = d3.scaleBand().domain(data.map(function (d) { return d.categoria; })).range([0, height - margin.top - margin.bottom]).padding(0.28);
+        var maxX = d3.max(data, function (d) { return d.registros; }) || 1;
+        var x = d3.scaleLinear().domain([0, maxX * 1.12]).range([0, innerW]);
+
+        g.selectAll(".rd-cat-label").data(data).join("text")
+          .attr("x", -10).attr("y", function (d) { return y(d.categoria) + y.bandwidth() / 2; })
+          .attr("dy", "0.32em").attr("text-anchor", "end")
+          .attr("fill", "var(--color-fg)").attr("font-size", "var(--cds-font-size-body)")
+          .text(function (d) { return d.categoria; });
+
+        var tooltip = document.getElementById("rd-tooltip");
+        var wrap = document.querySelector(".ream-dash");
+        var stacked = d3.stack().keys(series.map(function (s) { return s.key; }))(data);
+
+        stacked.forEach(function (layer, i) {
+          var s = series[i];
+          g.selectAll(".rd-seg-cat-" + i).data(layer).join("rect")
+            .attr("x", function (d) { return x(d[0]); }).attr("y", function (d) { return y(d.data.categoria); })
+            .attr("width", function (d) { return Math.max(0, x(d[1]) - x(d[0])); }).attr("height", y.bandwidth())
+            .attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 1)
+            .on("mousemove", function (event, d) {
+              var w = wrap.getBoundingClientRect();
+              tooltip.innerHTML = '<div class="rd-tt-title">' + d.data.categoria + ' · ' + fmtInt(d.data.registros) + ' registros</div>' +
+                series.map(function (ss) {
+                  return '<div class="rd-tt-row"><span class="rd-legend-swatch" style="background:' + ss.color + '"></span>' + ss.label + ": " + fmtInt(d.data[ss.key]) + "</div>";
+                }).join("");
+              tooltip.style.left = (event.clientX - w.left + 12) + "px";
+              tooltip.style.top = (event.clientY - w.top - 12) + "px";
+              tooltip.style.opacity = 1;
+            })
+            .on("mouseleave", function () { tooltip.style.opacity = 0; });
+        });
+
+        g.selectAll(".rd-cat-value").data(data).join("text")
+          .attr("x", function (d) { return x(d.registros) + 6; }).attr("y", function (d) { return y(d.categoria) + y.bandwidth() / 2; })
+          .attr("dy", "0.32em").attr("fill", "var(--color-fg-muted)").attr("font-size", "var(--cds-font-size-caption)")
+          .text(function (d) { return fmtInt(d.registros); });
+      }
+
+      // ---------- ranking chart ----------
+
+      var RANKING_SERIES = [
+        { key: "abertos", label: "Aberto", color: STATUS_COLOR["Aberto"] },
+        { key: "aguardando", label: "Aguardando material/resumo", color: STATUS_COLOR["Aguardando Material"] }
+      ];
+
+      function drawRanking() {
+        var box = document.getElementById("rd-ranking-chart");
+        var res = dash.data("por_se");
+        box.setAttribute("data-dash-source-state", res.status === "ok" ? (res.refreshing ? "refreshing" : "") : res.status);
+        var legend = document.getElementById("rd-ranking-legend");
+        if (res.status !== "ok") {
+          box.innerHTML = res.status === "loading"
+            ? '<div class="dash-skeleton" style="height:220px"></div>'
+            : '<div style="display:flex;align-items:center;justify-content:center;height:220px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)">Falha ao carregar</div>';
+          legend.innerHTML = "";
+          return;
+        }
+        var data = res.data.filter(function (d) { return d.pendentes > 0; })
+          .sort(function (a, b) { return b.pendentes - a.pendentes; }).slice(0, 8);
+
+        if (!data.length) {
+          box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:220px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)">Nenhuma SE com pendências em aberto</div>';
+          legend.innerHTML = "";
+          return;
+        }
+        fillLegend(legend, RANKING_SERIES);
+
+        var width = Math.max(box.clientWidth, 280);
+        var rowH = 30;
+        var margin = { top: 6, right: 40, bottom: 10, left: 92 };
+        var innerW = width - margin.left - margin.right;
+        var height = data.length * rowH + margin.top + margin.bottom;
+
+        box.innerHTML = "";
+        var svg = d3.select(box).append("svg").attr("viewBox", "0 0 " + width + " " + height).attr("role", "img")
+          .attr("aria-label", "SEs com maior número de itens não concluídos");
+        var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var y = d3.scaleBand().domain(data.map(function (d) { return d.se; })).range([0, height - margin.top - margin.bottom]).padding(0.28);
+        var maxX = d3.max(data, function (d) { return d.pendentes; }) || 1;
+        var x = d3.scaleLinear().domain([0, maxX * 1.12]).range([0, innerW]);
+
+        g.selectAll(".rd-rank-label").data(data).join("text")
+          .attr("x", -10).attr("y", function (d) { return y(d.se) + y.bandwidth() / 2; })
+          .attr("dy", "0.32em").attr("text-anchor", "end")
+          .attr("fill", "var(--color-fg)").attr("font-size", "var(--cds-font-size-body)")
+          .text(function (d) { return d.se; });
+
+        var tooltip = document.getElementById("rd-tooltip");
+        var wrap = document.querySelector(".ream-dash");
+        var stacked = d3.stack().keys(RANKING_SERIES.map(function (s) { return s.key; }))(data);
+
+        stacked.forEach(function (layer, i) {
+          var s = RANKING_SERIES[i];
+          g.selectAll(".rd-seg-rank-" + i).data(layer).join("rect")
+            .attr("x", function (d) { return x(d[0]); }).attr("y", function (d) { return y(d.data.se); })
+            .attr("width", function (d) { return Math.max(0, x(d[1]) - x(d[0])); }).attr("height", y.bandwidth())
+            .attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 1)
+            .style("cursor", "pointer")
+            .on("mousemove", function (event, d) {
+              var w = wrap.getBoundingClientRect();
+              tooltip.innerHTML = '<div class="rd-tt-title">' + d.data.se + '</div>' +
+                '<div class="rd-tt-row">' + fmtInt(d.data.abertos) + ' abertos, ' + fmtInt(d.data.aguardando) + ' aguardando, ' + fmtInt(d.data.pendentes) + ' no total</div>';
+              tooltip.style.left = (event.clientX - w.left + 12) + "px";
+              tooltip.style.top = (event.clientY - w.top - 12) + "px";
+              tooltip.style.opacity = 1;
+            })
+            .on("mouseleave", function () { tooltip.style.opacity = 0; })
+            .on("click", function (event, d) { openDetail(d.data.se); });
+        });
+
+        g.selectAll(".rd-rank-value").data(data).join("text")
+          .attr("x", function (d) { return x(d.pendentes) + 6; }).attr("y", function (d) { return y(d.se) + y.bandwidth() / 2; })
+          .attr("dy", "0.32em").attr("fill", "var(--color-fg-muted)").attr("font-size", "var(--cds-font-size-caption)")
+          .text(function (d) { return fmtInt(d.pendentes); });
+      }
+
+      // ---------- map of 23 SEs ----------
+
+      function drawSeGrid() {
+        var grid = document.getElementById("rd-se-grid");
+        var semanaFilter = document.getElementById("rd-mapa-semana").value;
+        var baseRes = dash.data("base");
+        var cadRes = dash.data("cadastro");
+        if (baseRes.status !== "ok" || cadRes.status !== "ok") {
+          grid.innerHTML = (baseRes.status === "loading" || cadRes.status === "loading")
+            ? '<div class="dash-skeleton" style="height:120px;grid-column:1/-1"></div>'
+            : '<div style="color:var(--color-fg-muted);grid-column:1/-1">Falha ao carregar</div>';
+          return;
+        }
+        // A pedido do coordenador, as posições ainda sem nome oficial ("A CADASTRAR")
+        // ficam fora deste mapa por enquanto; voltam a aparecer quando uma SE real
+        // for identificada e confirmada no cadastro.
+        var cadastroConfirmado = cadRes.data.filter(function (c) { return c.status_cadastro === "Confirmada"; });
+        var baseFiltrada = semanaFilter ? baseRes.data.filter(function (r) { return String(r.semana) === semanaFilter; }) : baseRes.data;
+        var data = computePorSe(baseFiltrada, cadastroConfirmado).sort(function (a, b) { return a.seq - b.seq; });
+        grid.innerHTML = "";
+        if (!data.length) {
+          grid.innerHTML = '<div style="color:var(--color-fg-muted);grid-column:1/-1">Nenhuma SE confirmada no cadastro.</div>';
+          return;
+        }
+        var LEVEL_LABEL = { prioridade: "Prioridade", atencao: "Atenção", controlada: "Controlada", cadastro: "Cadastro pendente" };
+        data.forEach(function (d) {
+          var btn = document.createElement("button");
+          btn.className = "rd-se-card";
+          btn.type = "button";
+          btn.dataset.key = d.se;
+          btn.innerHTML =
+            '<span class="rd-se-name">' + d.se + '</span>' +
+            '<span class="rd-se-count">' + fmtInt(d.registros) + '</span>' +
+            '<span class="rd-se-meta">' + fmtInt(d.pendentes) + ' não concluídos' + (semanaFilter ? ' na semana ' + semanaFilter : '') + '</span>' +
+            '<span class="rd-pill lvl-' + d.nivel + '">' + LEVEL_LABEL[d.nivel] + '</span>';
+          btn.addEventListener("click", function () { openDetail(d.se); });
+          grid.appendChild(btn);
+        });
+      }
+      document.getElementById("rd-mapa-semana").addEventListener("change", drawSeGrid);
+
+      // ---------- detail SE select ----------
+
+      var seSelectFilled = false;
+      function fillSeSelect() {
+        var sel = document.getElementById("rd-se-select");
+        var pendSel = document.getElementById("rd-pend-se");
+        var res = dash.data("cadastro");
+        if (res.status !== "ok" || seSelectFilled) return;
+        // Mesma regra do Mapa de SEs: as 2 posições ainda sem nome oficial ficam de
+        // fora das listas por enquanto.
+        var rows = res.data.slice()
+          .filter(function (r) { return r.status_cadastro === "Confirmada"; })
+          .sort(function (a, b) { return a.seq - b.seq; });
+        rows.forEach(function (r) {
+          var opt = document.createElement("option");
+          opt.value = r.se; opt.textContent = r.se;
+          sel.appendChild(opt);
+          pendSel.appendChild(opt.cloneNode(true));
+        });
+        seSelectFilled = true;
+        var current = dash.params().se || rows[0].se;
+        sel.value = current;
+        sel.addEventListener("change", function () { dash.setParams({ se: sel.value }); });
+      }
+
+      var catSelectFilled = false;
+      function fillCategoriaSelect() {
+        if (catSelectFilled) return;
+        var res = dash.data("base");
+        if (res.status !== "ok") return;
+        var cats = Array.from(new Set(res.data.map(function (r) { return r.categoria; }))).sort();
+        var sel = document.getElementById("rd-pend-categoria");
+        cats.forEach(function (c) {
+          var opt = document.createElement("option");
+          opt.value = c; opt.textContent = c;
+          sel.appendChild(opt);
+        });
+        catSelectFilled = true;
+      }
+
+      // ---------- pendencias: semana select ----------
+
+      var semanaSelectFilled = false;
+      function fillSemanaSelect() {
+        if (semanaSelectFilled) return;
+        var res = dash.data("base");
+        if (res.status !== "ok") return;
+        var weeks = Array.from(new Set(res.data.map(function (r) { return r.semana; }))).sort(function (a, b) { return a - b; });
+        ["rd-pend-semana", "rd-detail-semana", "rd-mapa-semana"].forEach(function (id) {
+          var sel = document.getElementById(id);
+          weeks.forEach(function (w) {
+            var opt = document.createElement("option");
+            opt.value = String(w); opt.textContent = "Semana " + w;
+            sel.appendChild(opt);
+          });
+        });
+        semanaSelectFilled = true;
+      }
+
+      // ---------- detail KPIs ----------
+
+      function fillDetailKpis(se) {
+        var res = dash.data("base");
+        var el = document.getElementById("rd-detail-kpis");
+        var note = document.getElementById("rd-detail-outros-note");
+        el.querySelectorAll("[data-field]").forEach(function (f) { f.classList.remove("dash-skeleton"); });
+        if (res.status !== "ok" || !se) return;
+        // Calculado direto da base (não do calc "por_se", que sempre soma as 5 semanas)
+        // para que os cartões reflitam o filtro de semana desta aba quando ativo.
+        var semanaFilter = document.getElementById("rd-detail-semana").value;
+        var rows = res.data.filter(function (r) {
+          return r.se === se && (!semanaFilter || String(r.semana) === semanaFilter);
+        });
+        var b = statusBuckets(rows);
+        var values = { registros: b.total, concluidos: b.concluidos, programados: b.programados, abertos: b.abertos, aguardando: b.aguardando };
+        ["registros", "concluidos", "programados", "abertos", "aguardando"].forEach(function (field) {
+          var target = el.querySelector('[data-field="' + field + '"]');
+          if (target) target.textContent = fmtInt(values[field]);
+        });
+        if (note) {
+          note.textContent = b.outros > 0
+            ? fmtInt(b.outros) + " registro" + (b.outros === 1 ? "" : "s") + " desta SE " + (b.outros === 1 ? "está" : "estão") + " marcado" + (b.outros === 1 ? "" : "s") + " como compartilhado/cancelado e não entra" + (b.outros === 1 ? "" : "m") + " nos indicadores acima — veja na tabela abaixo."
+            : "";
+        }
+      }
+
+      // ---------- generic sortable/searchable table ----------
+
+      function buildHeader(table, columns, sortState, onSort) {
+        var thead = table.querySelector("thead");
+        thead.innerHTML = "";
+        var tr = document.createElement("tr");
+        columns.forEach(function (col) {
+          var th = document.createElement("th");
+          if (col.sortable === false) {
+            th.textContent = col.label;
+          } else {
+            th.setAttribute("aria-sort", sortState.key === col.key ? (sortState.dir === 1 ? "ascending" : "descending") : "none");
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = col.label;
+            btn.addEventListener("click", function () { onSort(col.key); });
+            th.appendChild(btn);
+          }
+          tr.appendChild(th);
+        });
+        thead.appendChild(tr);
+      }
+
+      function renderRows(table, rows, columns, keyField, emptyMessage) {
+        var tbody = table.querySelector("tbody");
+        tbody.innerHTML = "";
+        if (!rows.length) {
+          var tr = document.createElement("tr");
+          tr.className = "rd-empty-row";
+          var td = document.createElement("td");
+          td.colSpan = columns.length;
+          td.textContent = emptyMessage;
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          return;
+        }
+        rows.forEach(function (row) {
+          var tr = document.createElement("tr");
+          tr.dataset.key = row[keyField];
+          columns.forEach(function (col) {
+            var td = document.createElement("td");
+            if (col.wide) td.className = "rd-col-wide";
+            if (col.render) {
+              var node = col.render(row);
+              if (node instanceof Node) td.appendChild(node); else td.textContent = node;
+            } else {
+              td.textContent = row[col.key] || "—";
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+
+      function matchesSearch(row, q, fields) {
+        if (!q) return true;
+        q = q.toLowerCase();
+        return fields.some(function (f) { return String(row[f] || "").toLowerCase().indexOf(q) !== -1; });
+      }
+
+      // ---------- detail table ----------
+
+      var DETAIL_COLUMNS = [
+        { key: "semana", label: "Semana" },
+        { key: "data", label: "Data", render: function (r) { return fmtDate(r.data); } },
+        { key: "status_grupo", label: "Status", render: function (r) { return statusChip(r.status_grupo); } },
+        { key: "categoria", label: "Categoria" },
+        { key: "atividade", label: "Atividade / achado", wide: true },
+        { key: "operacao", label: "Operação/Checklist", wide: true },
+        { key: "responsavel", label: "Responsável" },
+        { key: "om", label: "OM SAP" }
+      ];
+      var detailSort = { key: "data", dir: -1 };
+
+      function drawDetailTable() {
+        var table = document.getElementById("rd-detail-table");
+        var res = dash.data("base");
+        var se = dash.params().se;
+        buildHeader(table, DETAIL_COLUMNS, detailSort, function (key) {
+          detailSort.dir = detailSort.key === key ? -detailSort.dir : 1;
+          detailSort.key = key;
+          drawDetailTable();
+        });
+        if (res.status !== "ok" || !se) {
+          renderRows(table, [], DETAIL_COLUMNS, "id", res.status === "loading" ? "Carregando…" : "Falha ao carregar");
+          document.getElementById("rd-detail-count").textContent = "";
+          return;
+        }
+        var q = document.getElementById("rd-detail-search").value.trim();
+        var semanaFilter = document.getElementById("rd-detail-semana").value;
+        var allSeRows = res.data.filter(function (r) { return r.se === se; });
+        var rows = allSeRows
+          .filter(function (r) { return !semanaFilter || String(r.semana) === semanaFilter; })
+          .filter(function (r) { return matchesSearch(r, q, ["atividade", "om", "responsavel", "observacao", "operacao"]); });
+        rows.sort(function (a, b) {
+          var av = a[detailSort.key], bv = b[detailSort.key];
+          if (av < bv) return -1 * detailSort.dir;
+          if (av > bv) return 1 * detailSort.dir;
+          return 0;
+        });
+        renderRows(table, rows, DETAIL_COLUMNS, "id", "Nenhum registro encontrado para esta busca.");
+        document.getElementById("rd-detail-count").textContent = fmtInt(rows.length) + " de " + fmtInt(allSeRows.length) + " registros de " + se + (semanaFilter ? " na semana " + semanaFilter : "");
+      }
+      document.getElementById("rd-detail-search").addEventListener("input", drawDetailTable);
+      document.getElementById("rd-detail-semana").addEventListener("change", function () {
+        fillDetailKpis(dash.params().se);
+        drawDetailTable();
+      });
+
+      // ---------- pendencias table ----------
+
+      var PEND_COLUMNS = [
+        { key: "semana", label: "Semana" },
+        { key: "se", label: "SE" },
+        { key: "status_grupo", label: "Status", render: function (r) { return statusChip(r.status_grupo); } },
+        { key: "categoria", label: "Categoria" },
+        { key: "atividade", label: "Atividade / achado", wide: true },
+        { key: "aguardando", label: "Aguardando o quê", wide: true },
+        { key: "operacao", label: "Operação/Checklist", wide: true },
+        { key: "responsavel", label: "Responsável" },
+        { key: "om", label: "OM SAP" }
+      ];
+      var pendSort = { key: "semana", dir: -1 };
+      var PENDENTE_STATUS = ["Aberto", "Programado", "Aguardando Material", "Aguardando Resumo Técnico"];
+
+      function drawPendTable() {
+        var table = document.getElementById("rd-pend-table");
+        var res = dash.data("base");
+        buildHeader(table, PEND_COLUMNS, pendSort, function (key) {
+          pendSort.dir = pendSort.key === key ? -pendSort.dir : 1;
+          pendSort.key = key;
+          drawPendTable();
+        });
+        if (res.status !== "ok") {
+          renderRows(table, [], PEND_COLUMNS, "id", res.status === "loading" ? "Carregando…" : "Falha ao carregar");
+          document.getElementById("rd-pend-count").textContent = "";
+          return;
+        }
+        var semanaFilter = document.getElementById("rd-pend-semana").value;
+        var seFilter = document.getElementById("rd-pend-se").value;
+        var catFilter = document.getElementById("rd-pend-categoria").value;
+        var statusFilter = document.getElementById("rd-pend-status").value;
+        var q = document.getElementById("rd-pend-search").value.trim();
+
+        var base = res.data.filter(function (r) { return PENDENTE_STATUS.indexOf(r.status_grupo) !== -1; });
+        var rows = base.filter(function (r) {
+          return (!semanaFilter || String(r.semana) === semanaFilter) &&
+            (!seFilter || r.se === seFilter) &&
+            (!catFilter || r.categoria === catFilter) &&
+            (!statusFilter || r.status_grupo === statusFilter) &&
+            matchesSearch(r, q, ["atividade", "om", "responsavel", "observacao", "aguardando", "se", "operacao"]);
+        });
+        rows.sort(function (a, b) {
+          var av = a[pendSort.key], bv = b[pendSort.key];
+          if (av < bv) return -1 * pendSort.dir;
+          if (av > bv) return 1 * pendSort.dir;
+          return 0;
+        });
+        renderRows(table, rows, PEND_COLUMNS, "id", "Nenhuma pendência encontrada para estes filtros.");
+        document.getElementById("rd-pend-count").textContent = fmtInt(rows.length) + " de " + fmtInt(base.length) + " pendências";
+      }
+      ["rd-pend-semana", "rd-pend-se", "rd-pend-categoria", "rd-pend-status"].forEach(function (id) {
+        document.getElementById(id).addEventListener("change", drawPendTable);
+      });
+      document.getElementById("rd-pend-search").addEventListener("input", drawPendTable);
+      document.getElementById("rd-pend-clear").addEventListener("click", function () {
+        document.getElementById("rd-pend-semana").value = "";
+        document.getElementById("rd-pend-se").value = "";
+        document.getElementById("rd-pend-categoria").value = "";
+        document.getElementById("rd-pend-status").value = "";
+        document.getElementById("rd-pend-search").value = "";
+        drawPendTable();
+      });
+
+      // ---------- main render ----------
+
+      function renderAll() {
+        fillKpis();
+        fillSeSelect();
+        fillCategoriaSelect();
+        fillSemanaSelect();
+        var activePage = PAGES.find(function (p) { return !document.getElementById("rd-page-" + p).hidden; });
+        if (activePage === "geral") { drawSemanal(); drawRanking(); drawCategoria(); }
+        if (activePage === "mapa") drawSeGrid();
+        if (activePage === "detalhe") { fillDetailKpis(dash.params().se); drawDetailTable(); }
+        if (activePage === "pendencias") drawPendTable();
+      }
+
+      document.getElementById("rd-se-select").addEventListener("change", function () {
+        dash.setParams({ se: this.value });
+      });
+
+      dash.onData(renderAll);
+      window.addEventListener("resize", function () { window.requestAnimationFrame(renderAll); });
+
+      var initialHash = location.hash.slice(1);
+      if (PAGES.indexOf(initialHash) !== -1) showPage(initialHash);
+      // Garante a primeira renderização mesmo que onData/hash não disparem nada
+      // sozinhos nesta página (idempotente — repetir não tem efeito colateral).
+      window.requestAnimationFrame(renderAll);
+    })();
+
+  }
+
+  try {
+    window.dash = createDash({ base: JSON.parse(document.getElementById('rd-embedded-data').textContent).base, cadastro: JSON.parse(document.getElementById('rd-embedded-data').textContent).cadastro });
+    initApp();
+  } catch (err) {
+    console.error(err);
+    var wrap = document.querySelector(".ream-dash");
+    if (wrap) {
+      wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#c22e33;font-family:sans-serif">' +
+        '<p><strong>Não foi possível carregar os dados do dashboard.</strong></p>' +
+        '<p style="font-size:13px;color:#636c76">' + (err && err.message ? err.message : err) + '</p>' +
+        '</div>';
+    }
+  }
+
+</script>
+</body>
+</html>
